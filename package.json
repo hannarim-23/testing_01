@@ -1,0 +1,23 @@
+{
+  "name": "testing_01",
+  "version": "1.0.0",
+  "description": "Проект для автоматизированного тестирования интернет-магазина с использованием **Playwright**.",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hannarim-23/testing_01.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/hannarim-23/testing_01/issues"
+  },
+  "homepage": "https://github.com/hannarim-23/testing_01#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^25.8.0"
+  }
+}
