@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { getTestUser } from '../helpers/testData';
+import { selectors } from '../helpers/selectors';
 
 const BASE_URL = process.env.BASE_URL;
 const EMAIL = process.env.TEST_USER_EMAIL;
@@ -8,17 +9,6 @@ const PASSWORD = process.env.TEST_USER_PASSWORD;
 if (!BASE_URL || !EMAIL || !PASSWORD) {
   throw new Error('❌ Missing BASE_URL in .env');
 }
-
-const selectors = {
-  firstnameInput: 'input[name="firstname"]',
-  lastnameInput: 'input[name="lastname"]',
-  emailInput: 'input[name="email"]',
-  usernameInput: 'input[name="username"]',
-  phoneInput: 'input[name="phoneNumber"]',
-  passwordInput: 'input[name="password"]',
-  submitButton: 'button[type="submit"]',
-  errorMessage: 'email must be an email',
-};
 
 test.describe('Register Tests', () => {
   test.beforeEach(async ({ page }) => {

@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { selectors } from '../helpers/selectors';
 
 const BASE_URL = process.env.BASE_URL;
 const EMAIL = process.env.TEST_USER_EMAIL;
@@ -8,16 +9,6 @@ const PASSWORD = process.env.TEST_USER_PASSWORD;
 if (!BASE_URL || !EMAIL || !PASSWORD) {
   throw new Error('❌ Missing environment variables. Check .env file');
 }
-
-// Селекторы (легко менять, если изменится вёрстка)
-const selectors = {
-  emailInput: 'input[name="email"]',
-  passwordInput: 'input[name="password"]',
-  submitButton: 'button[type="submit"]',
-  errorMessage: 'Неверный email или пароль',
-  errorPassword: 'Пароль обязателен',
-  errorEmail: 'Email обязателен',
-};
 
 test.describe('Login Tests', () => {
   // Выполняется перед КАЖДЫМ тестом
