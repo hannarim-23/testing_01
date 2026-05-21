@@ -62,6 +62,10 @@ test.describe('Login Tests', () => {
     await expect(page.getByText(selectors.errorPassword)).toBeVisible();
   });
 
+  // BUG-03: Фронтенд не проверяет формат email на странице входа
+  // Ожидается: ошибка валидации на фронтенде до отправки запроса
+  // Фактически: форма отправляется, сервер возвращает "Неверный email или пароль"
+  // TODO: добавить проверку фронтенд-валидации после исправления
   test('TC_LOG_06: Невалидный формат email', async ({ page }) => {
     await page.fill(selectors.emailInput, 'test');
     await page.fill(selectors.passwordInput, '12345678');
@@ -89,5 +93,4 @@ test.describe('Login Tests', () => {
     await expect(page).toHaveURL(`${BASE_URL}/login`);
     await expect(page.getByText(selectors.errorMessage)).toBeVisible();
   });
-
 });
