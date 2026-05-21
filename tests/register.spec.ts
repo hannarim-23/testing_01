@@ -64,6 +64,10 @@ test.describe('Register Tests', () => {
     await expect(page.getByText(`email must be an email`)).toBeVisible();
   });
 
+  // BUG-01: Неинформативное сообщение об ошибке при коротком пароле
+  // Ожидается: "Пароль должен содержать минимум 8 символов"
+  // Фактически: красное слово "пароль"
+  // TODO: раскомментировать проверку нормального сообщения после исправления
   test('TC_REG_04: Слишком короткий пароль (< 8 символов)', async ({
     page,
   }) => {
@@ -125,7 +129,10 @@ test.describe('Register Tests', () => {
     ).toBeVisible();
   });
 
-  //баг (Отсутствует проверка уникальности номера телефона)
+  // BUG-02: Отсутствует проверка уникальности номера телефона
+  // Ожидается: ошибка "Телефон уже используется"
+  // Фактически: регистрация проходит успешно
+  // TODO: раскомментировать проверку ошибки после исправления
   test('TC_REG_07: Телефон уже существует', async ({ page }) => {
     const user = getTestUser();
 
@@ -141,6 +148,10 @@ test.describe('Register Tests', () => {
     //await expect(page.getByText(` Telephone number "${user.phone}" already exists.`)).toBeVisible(); // расскомментировать, когда баг будет исправлен
   });
 
+  // BUG-04: Поле email подставляет username вместо email
+  // Ожидается: поле email пустое или содержит email
+  // Фактически: поле email содержит username
+  // TODO: после исправления заменить проверку на expect(emailValue).toBe('')
   test('TC_REG_08: Проверка поля email после регистрации', async ({ page }) => {
     const user = getTestUser();
 
