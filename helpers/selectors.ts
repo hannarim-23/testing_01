@@ -21,22 +21,25 @@ export const selectors = {
   productCard: 'a[href*="/product/"]',
   addToCartButton: 'button:has-text("В корзину")',
   cart: 'a[href="/cart"]',
+  productPrice: 'span',
 
   // Карточка продукта
-  title: 'h3, .font-semibold',
- // productTitle: 'h3, .font-semibold, .product-title', //если бы отслеживались
- // productPrice: 'div:has-text("руб"), div:has-text("$")', //если бы отслеживались
+  // title: 'h3, .font-semibold',
+  // productTitle: 'h3, .font-semibold, .product-title', //если бы отслеживались
+  //если бы отслеживались
   productImage: 'img',
 
   // Корзина
   cartIcon: '[data-testid="cart-icon"], .cart-icon, a[href*="cart"]',
   //cartItem: '.cart-item, [data-testid="cart-item"]',
-  cartItem: 'data-testid="cart-item"',
+  //cartItem: 'data-testid="cart-item"',
+
   removeButton: 'button:has-text("Удалить")',
-  totalPrice: '.total-price, [data-testid="total-price"]',
+  totalPrice: 'span:has-text("Итого:") + span',
   checkoutButton: 'button:has-text("Оформить заказ")',
   emptyCartMessage: 'text=Ваша корзина пуста',
 
   // Заказы
   orderSuccessMessage: 'text=Заказ успешно создан',
+  order: 'button:has-text("Заказ #")',
 };
