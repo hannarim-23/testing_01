@@ -70,77 +70,45 @@ test.describe('Cart Tests', () => {
     await cartPage.expectEmptyCart();
   });
 
-  test('TC_CART_05: Общая сумма пересчитывается @regression', async () => {});
+  test('TC_CART_05: Общая сумма пересчитывается @regression', async () => {
+    await cartPage.clearCart();
+
+    // Добавляем товары через href (на главной странице)
+    await catalogPage.addProductByHref(PRODUCT_HREF1);
+    await catalogPage.addProductByHref(PRODUCT_HREF2);
+
+    // Переходим в корзину
+    await cartPage.goToCart();
+
+    // Получаем общую сумму из корзины
+    const totalText = await cartPage.getTotalPrice();
+    const cartTotal = parseFloat(
+      totalText?.replace(/[^\d.,]/g, '').replace(',', '.') || '0'
+    );
+
+    // Ожидаемая сумма (цены товаров)
+    const expectedTotal = 999.99 + 799.0;
+
+    // Округляем для сравнения
+    const roundedActual = Math.round(cartTotal * 100) / 100;
+    const roundedExpected = Math.round(expectedTotal * 100) / 100;
+
+    console.log(`💰 Ожидаемая сумма: ${roundedExpected}`);
+    console.log(`💰 Фактическая сумма: ${roundedActual}`);
+
+    expect(roundedActual).toBe(roundedExpected);
+  });
+
+  test('TC_CART_06: Кнопка "Оформить заказ" @smoke', async () => {
+    await catalogPage.addProductByHref(PRODUCT_HREF2);
+    await cartPage.goToCart();
+    await cartPage.checkout();
+    await cartPage.expectOrderSuccess();
+    await expect(cartPage.page).toHaveURL('/');
+  });
 });
 
 /*
-test.describe('Cart Tests', () => {
-  test('TC_CART_05: Общая сумма пересчитывается', async ({ page }) => {
-    await page.goto(`${BASE_URL}`);
-
-    const firstProduct = page.locator(`a[href="${productHref1}"]`);
-    const secondProduct = page.locator(`a[href="${productHref2}"]`);
-
-    await firstProduct.locator(selectors.addToCartButton).click();
-    await secondProduct.locator(selectors.addToCartButton).click();
-
-    await page.click(selectors.cartIcon);
-    await page.waitForLoadState('networkidle');
-
-    // Ищем цены ТОЛЬКО в корзине
-    const cartItems = page.locator('.text-sm.text-muted-foreground');
-    const itemCount = await cartItems.count();
-    console.log('Товаров в корзине:', itemCount);
-
-    let totalFromItems = 0;
-
-    for (let i = 0; i < itemCount; i++) {
-      const priceText = await cartItems.nth(i).textContent();
-      const price = parseFloat(priceText?.split(' ')[0] || '0');
-      totalFromItems += price;
-      console.log(`Товар ${i + 1}: ${price}`);
-    }
-
-    const cartTotalPrise = await page
-      .locator(selectors.totalPrice)
-      .textContent();
-    console.log('cartTotalPrise:', cartTotalPrise);
-    console.log(
-      'cartTotalPrise:',
-      parseFloat(cartTotalPrise.split(' ')[0] || '0')
-    );
-
-    const isTrue =
-      parseFloat(cartTotalPrise.split(' ')[0] || '0') == totalFromItems;
-    expect(isTrue).toBeTruthy();
-  });
-
-  test('TC_CART_06: Кнопка "Оформить заказ"', async ({ page }) => {
-    await page.goto(`${BASE_URL}/orders`);
-
-    await page.waitForLoadState('networkidle');
-
-    const ordersBefore = await page.locator(selectors.order).all();
-    console.log('ordersBefore:', ordersBefore.length);
-
-    await page.goto(`${BASE_URL}/product/51`); //iPhone 15 Pro
-    await expect(page.getByText(product)).toBeVisible();
-    await page.click(selectors.addToCartButton);
-
-    await page.goto(`${BASE_URL}/cart`);
-    await page.click(selectors.checkoutButton);
-    await expect(page.locator(selectors.orderSuccessMessage)).toBeVisible();
-    await expect(page).toHaveURL(`${BASE_URL}`);
-
-    await page.goto(`${BASE_URL}/orders`);
-
-    await page.waitForLoadState('networkidle');
-    const ordersAfter = await page.locator(selectors.order).all();
-    console.log('ordersAfter:', ordersAfter.length);
-
-    await expect(ordersAfter.length == ordersBefore.length + 1).toBeTruthy();
-  });
-
   // BUG-07: Система нестабильна при добавлении >20 товаров в корзину
   // Ожидание: стабильная работа с 50 товарами
   // Факт: падение на 10-25 товарах

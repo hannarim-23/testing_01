@@ -27,15 +27,12 @@ export const selectors = {
   // Карточка продукта
   // title: 'h3, .font-semibold',
   // productTitle: 'h3, .font-semibold, .product-title', //если бы отслеживались
-  //если бы отслеживались
   productImage: 'img',
   errorMessageProduct: 'Не удалось загрузить продукт',
 
   // Корзина
   cartIcon: 'a[href="/cart"]',
   cartItem: '.cart-item, [data-testid="cart-item"]',
-  //cartItem: 'data-testid="cart-item"',
-  //
   cartItemPrice: '.text-sm.text-muted-foreground',
 
   removeButton: 'button:has-text("Удалить")',
@@ -44,6 +41,6 @@ export const selectors = {
   emptyCartMessage: 'text=Ваша корзина пуста.',
 
   // Заказы
-  orderSuccessMessage: 'text=Заказ успешно создан',
+  orderSuccessMessage: 'Заказ успешно создан',
   order: 'button:has-text("Заказ #")',
 };

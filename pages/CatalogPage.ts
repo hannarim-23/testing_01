@@ -36,14 +36,10 @@ export class CatalogPage {
       .first();
   }
 
-
-
-
   async addProductToCart(productName: string) {
-  /*  const productCard = await this.getProductCardByName(productName);
-    await productCard.locator(selectors.addToCartButton).click();
-    */
-    const productCard = this.page.locator(`a[href*="/product/"]:has-text("${productName}")`).first();
+    const productCard = this.page
+      .locator(`a[href*="/product/"]:has-text("${productName}")`)
+      .first();
     await expect(productCard).toBeVisible({ timeout: 10000 });
     const addButton = productCard.locator(selectors.addToCartButton);
     await expect(addButton).toBeVisible({ timeout: 5000 });
@@ -51,37 +47,18 @@ export class CatalogPage {
     await expect(this.successMessage).toBeVisible({ timeout: 5000 });
   }
 
-
-
-
-
   async addProductByHref(productHref: string) {
-    /*
-    // Находим товар по href на странице каталога
-    const product = this.page.locator(`a[href="${productHref}"]`);
-    
-    // Ждём, пока товар появится
-    await expect(product).toBeVisible({ timeout: 10000 });
-    
-    // Находим кнопку "В корзину" внутри этого товара
-    const addButton = product.locator(selectors.addToCartButton);
-    
-    // Ждём, пока кнопка станет видимой
-    await expect(addButton).toBeVisible({ timeout: 5000 });
-    
-    // Кликаем
-    await addButton.click();
-    
-    // Ждём уведомление
-    //await expect(this.successMessage).toBeVisible({ timeout: 5000 });
-    */
+    await this.goto();
+
     const product = this.page.locator(`a[href="${productHref}"]`);
     await expect(product).toBeVisible({ timeout: 10000 });
+
     const addButton = product.locator(selectors.addToCartButton);
     await expect(addButton).toBeVisible({ timeout: 5000 });
     await addButton.click();
+
     await expect(this.successMessage).toBeVisible({ timeout: 5000 });
-}
+  }
 
   async getProductPriceByName(productName: string) {
     const productCard = await this.getProductCardByName(productName);
@@ -144,5 +121,28 @@ export class CatalogPage {
       }
     }
     expect(brokenImagesCount).not.toBe(0); //после исправления бага 06 удалить (.not)
+  }
+
+  async addProductByIndex(index: number) {
+    const products = await this.productCard.all();
+    if (index >= products.length) {
+      throw new Error(`Товар с индексом ${index} не найден`);
+    }
+    const addButton = products[index].locator(selectors.addToCartButton);
+    await expect(addButton).toBeVisible({ timeout: 5000 });
+    await addButton.click();
+    await expect(this.successMessage).toBeVisible({ timeout: 5000 });
+  }
+
+  async getProductPriceByIndex(index: number): Promise<number> {
+    const products = await this.productCard.all();
+    if (index >= products.length) {
+      throw new Error(`Товар с индексом ${index} не найден`);
+    }
+    const priceText = await products[index]
+      .locator(selectors.productPrice)
+      .first()
+      .textContent();
+    return parseFloat(priceText?.replace(/\s/g, '').replace(',', '.') || '0');
   }
 }
