@@ -7,6 +7,7 @@ export const selectors = {
   phoneInput: 'input[name="phoneNumber"]',
   passwordInput: 'input[name="password"]',
   submitButton: 'button[type="submit"]',
+
   errorMessage: 'Неверный email или пароль',
   errorPassword: 'Пароль обязателен',
   errorEmail: 'Email обязателен',
@@ -15,12 +16,12 @@ export const selectors = {
   loginEmailInput: 'input[name="email"]',
   loginPasswordInput: 'input[name="password"]',
   loginButton: 'button[type="submit"]',
+  
   loginErrorMessage: 'Неверный email или пароль',
 
   // Каталог
   productCard: 'a[href*="/product/"]',
   addToCartButton: 'button:has-text("В корзину")',
-  cart: 'a[href="/cart"]',
   productPrice: 'span',
 
   // Карточка продукта
@@ -28,16 +29,19 @@ export const selectors = {
   // productTitle: 'h3, .font-semibold, .product-title', //если бы отслеживались
   //если бы отслеживались
   productImage: 'img',
+  errorMessageProduct: 'Не удалось загрузить продукт',
 
   // Корзина
-  cartIcon: '[data-testid="cart-icon"], .cart-icon, a[href*="cart"]',
-  //cartItem: '.cart-item, [data-testid="cart-item"]',
+  cartIcon: 'a[href="/cart"]',
+  cartItem: '.cart-item, [data-testid="cart-item"]',
   //cartItem: 'data-testid="cart-item"',
+  //
+  cartItemPrice: '.text-sm.text-muted-foreground',
 
   removeButton: 'button:has-text("Удалить")',
   totalPrice: 'span:has-text("Итого:") + span',
   checkoutButton: 'button:has-text("Оформить заказ")',
-  emptyCartMessage: 'text=Ваша корзина пуста',
+  emptyCartMessage: 'text=Ваша корзина пуста.',
 
   // Заказы
   orderSuccessMessage: 'text=Заказ успешно создан',

@@ -1,144 +1,72 @@
 import { test, expect } from '@playwright/test';
-import { selectors } from '../helpers/selectors';
+import { CatalogPage } from '../pages/CatalogPage';
+import { LoginPage } from '../pages/LoginPage';
 
-const BASE_URL = process.env.BASE_URL;
 const EMAIL = process.env.TEST_USER_EMAIL;
 const PASSWORD = process.env.TEST_USER_PASSWORD;
+const PRODUCT_NUMBER = 50;
+const PRODUCT_NAME_TEST = 'iPad Pro 11';
+const INVALD_PAGE = '/product/999999';
 
-if (!BASE_URL || !EMAIL || !PASSWORD) {
+if (!EMAIL || !PASSWORD) {
   throw new Error('❌ Missing environment variables. Check .env file');
 }
 
-test.describe('Login Tests', () => {
+test.describe('Catalog Tests', () => {
+  let catalogPage: CatalogPage;
+  let loginPage: LoginPage;
+
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/login`);
+    loginPage = new LoginPage(page);
+    await loginPage.goto();
+    await loginPage.login(EMAIL, PASSWORD);
+    await loginPage.expectSuccess();
 
-    await page.fill(selectors.emailInput, EMAIL);
-    await page.fill(selectors.passwordInput, PASSWORD);
-    await page.click(selectors.submitButton);
-
-    await expect(page).toHaveURL(`${BASE_URL}/`);
+    catalogPage = new CatalogPage(page);
+    await catalogPage.goto();
   });
 
-  test('TC_Ctlg_01: Открытие главной страницы', async ({ page }) => {
-    await expect(page).toHaveURL(`${BASE_URL}/`);
-
-    const products = page.locator(selectors.productCard);
-    await expect(products.first()).toBeVisible();
-
-    const products2 = await page.locator(selectors.productCard).all(); //массив
-    // Проверяем, что массив не пустой
-    expect(products2.length).toBeGreaterThan(0);
-    // Или
-    expect(products2.length > 0).toBe(true);
+  test('TC_Ctlg_01: Открытие главной страницы @smoke', async () => {
+    await catalogPage.expectSuccess();
   });
 
-  test('TC_Ctlg_02: Количество товаров = 50', async ({ page }) => {
-    const products = page.locator(selectors.productCard);
-    await expect(products).toHaveCount(50);
-
-    const products2 = await page.locator(selectors.productCard).all();
-    expect(products2.length == 50).toBe(true);
+  test('TC_Ctlg_02: Количество товаров = 50 @smoke', async () => {
+    await catalogPage.expectSuccess();
+    await catalogPage.expectProductCount(PRODUCT_NUMBER);
   });
 
   // BUG-06: Некоторые изображения товаров не загружаются
   // Ожидается: все картинки загружены (naturalWidth > 0)
   // Фактически: у некоторых товаров naturalWidth = 0
-  // TODO: после исправления бага убрать сбор списка битых картинок
-  test.skip('TC_Ctlg_03: Карточка товара содержит все элементы', async ({
-    page,
-  }) => {
-    await page.waitForLoadState('networkidle');
-
-    const products = await page.locator(selectors.productCard).all();
-    expect(products.length).toBeGreaterThan(0);
-    console.log(`Найдено товаров: ${products.length}`);
-
-    //  const brokenImages: number[] = [];
-
-    for (let i = 0; i < products.length; i++) {
-      await expect(products[i]).toBeVisible();
-
-      //await expect(products[i].locator(selectors.productTitle).first()).toBeVisible(); //если бы можно было отследить
-      //await expect(product[i].locator(selectors.productPrice).first()).toBeVisible();//если бы можно было отследить
-
-      await expect(
-        products[i].locator(selectors.addToCartButton)
-      ).toBeVisible();
-
-      // проверка загрузилась ли картинка
-      const image = products[i].locator(selectors.productImage).first();
-      const isLoaded = await image.evaluate((img) => {
-        return (img as HTMLImageElement).naturalWidth > 0;
-      });
-      expect(isLoaded, `❌ Товар ${i + 1}: картинка не загрузилась`).toBe(true);
-
-      /*
-        // проверка загрузилась ли картинка
-        const image = products[i].locator('img').first();
-        const hasError = await image.evaluate((img) => {
-            const imageElement = img as HTMLImageElement;
-            return imageElement.complete && imageElement.naturalWidth === 0;
-        });
-        
-        if (hasError) {
-            const altText = await image.getAttribute('alt');
-            console.log(`❌ Товар ${i + 1}: картинка НЕ загружена (alt: ${altText})`);
-            brokenImages.push(i + 1);
-        } else {
-            console.log(`✅ Товар ${i + 1}: картинка загружена`);
-        }
-            */
-    }
-    /*
-    if (brokenImages.length > 0) {
-        console.log(`\n❌ БАГ: Не загрузились картинки у товаров: ${brokenImages.join(', ')}`);
-    }
-    
-    expect(brokenImages.length).toBe(0);
-    */
+  // TODO: после исправления бага исправить в CatalogPages.ts метод
+  test('TC_Ctlg_03: Карточка товара содержит элементы @regression', async () => {
+    await catalogPage.loadImage();
   });
 
-  test('TC_Ctlg_04: Открытие карточки товара', async ({ page }) => {
-    const productName = 'iPad Pro 11';
-    const productLink = page
-      .locator(`a[href*="/product/"]:has-text("${productName}")`)
-      .first();
-    await expect(productLink).toBeVisible();
+  test('TC_Ctlg_04: Открытие карточки товара @smoke', async () => {
+    const productCard = await catalogPage.getProductCardByName(
+      PRODUCT_NAME_TEST
+    );
+    const href = await productCard.getAttribute('href');
 
-    const href = await productLink.getAttribute('href');
-    await productLink.click();
-
-    await expect(page).toHaveURL(`${BASE_URL}${href}`);
-    await expect(page.getByText(productName)).toBeVisible();
+    await productCard.click();
+    await expect(catalogPage.page).toHaveURL(`${href}`);
+    await expect(catalogPage.page.getByText(PRODUCT_NAME_TEST)).toBeVisible();
   });
 
-  test('TC_Ctlg_05: Кнопка "Добавить" работает', async ({ page }) => {
-    const productName = 'iPad Pro 11';
-    const productLink = page
-      .locator(`a[href*="/product/"]:has-text("${productName}")`)
-      .first();
-    await expect(productLink).toBeVisible();
+  test('TC_Ctlg_05: Кнопка "Добавить" работает @smoke', async () => {
+    await catalogPage.addProductToCart(PRODUCT_NAME_TEST);
 
-    const addBtn = productLink.locator(selectors.addToCartButton);
-    await addBtn.click();
+    await expect(
+      catalogPage.page.getByText('Товар добавлен в корзину')
+    ).toBeVisible();
 
-    await expect(page.getByText('Товар добавлен в корзину')).toBeVisible();
-
-    const cart = page.locator(selectors.cart);
-    await cart.click();
-
-    await expect(page).toHaveURL(`${BASE_URL}/cart`);
-    await expect(page.getByText(productName)).toBeVisible();
+    await catalogPage.goToCart();
+    await expect(catalogPage.page).toHaveURL('/cart');
+    await expect(catalogPage.page.getByText(PRODUCT_NAME_TEST)).toBeVisible();
   });
 
-  test('TC_Ctlg_06: Открытие несуществующей карточки товара', async ({
-    page,
-  }) => {
-    await page.goto(`${BASE_URL}/product/999999`);
-
-    await expect(page.locator('text=Загрузка продукта...')).toBeVisible();
-    const errorMessage = page.locator('text=Не удалось загрузить продукт');
-    await expect(errorMessage).toBeVisible({ timeout: 10000 });
+  test('TC_Ctlg_06: Открытие несуществующего товара @regression', async () => {
+    await catalogPage.expectErrorMessage(INVALD_PAGE);
   });
 });

@@ -1,7 +1,7 @@
-import { test, expect } from '@playwright/test';
-import { selectors } from '../helpers/selectors';
+import { test } from '@playwright/test';
+import { LoginPage } from '../pages/LoginPage';
 
-const BASE_URL = process.env.BASE_URL;
+const BASE_URL = process.env.BASE_URL; //baseURL в конфиге, поэтому не обязателен
 const EMAIL = process.env.TEST_USER_EMAIL;
 const PASSWORD = process.env.TEST_USER_PASSWORD;
 
@@ -11,86 +11,55 @@ if (!BASE_URL || !EMAIL || !PASSWORD) {
 }
 
 test.describe('Login Tests', () => {
-  // Выполняется перед КАЖДЫМ тестом
+  let loginPage: LoginPage;
+
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/login`);
+    loginPage = new LoginPage(page);
+    await loginPage.goto();
   });
 
-  test('TC_LOG_01: Успешный вход с валидными данными @smoke @regression', async ({
-    page,
-  }) => {
-    await page.fill(selectors.emailInput, EMAIL);
-    await page.fill(selectors.passwordInput, PASSWORD);
-    await page.click(selectors.submitButton);
-
-    await expect(page).toHaveURL(`${BASE_URL}/`);
+  test('TC_LOG_01: Успешный вход @smoke @regression', async () => {
+    await loginPage.login(EMAIL, PASSWORD);
+    await loginPage.expectSuccess();
   });
 
-  test('TC_LOG_02: Неверный пароль @regression', async ({ page }) => {
-    await page.fill(selectors.emailInput, EMAIL);
-    await page.fill(selectors.passwordInput, 'wrongpassword');
-    await page.click(selectors.submitButton);
-
-    await expect(page).toHaveURL(`${BASE_URL}/login`);
-    await expect(page.getByText(selectors.errorMessage)).toBeVisible();
+  test('TC_LOG_02: Неверный пароль @regression', async () => {
+    await loginPage.login(EMAIL, 'wrongpassword');
+    await loginPage.expectErrorOnPage();
   });
 
-  test('TC_LOG_03: Несуществующий email', async ({ page }) => {
-    await page.fill(selectors.emailInput, 'nonexistent@mail.ru');
-    await page.fill(selectors.passwordInput, PASSWORD);
-    await page.click(selectors.submitButton);
-
-    await expect(page).toHaveURL(`${BASE_URL}/login`);
-    await expect(page.getByText(selectors.errorMessage)).toBeVisible();
+  test('TC_LOG_03: Несуществующий email @regression', async () => {
+    await loginPage.login('nonexistent@mail.ru', PASSWORD);
+    await loginPage.expectErrorOnPage();
   });
 
-  test('TC_LOG_04: Пустой email', async ({ page }) => {
-    await page.fill(selectors.emailInput, '');
-    await page.fill(selectors.passwordInput, '12345678');
-    await page.click(selectors.submitButton);
-
-    await expect(page).toHaveURL(`${BASE_URL}/login`);
-    await expect(page.getByText(selectors.errorEmail)).toBeVisible();
+  test('TC_LOG_04: Пустой email @regression', async () => {
+    await loginPage.login('', PASSWORD);
+    await loginPage.expectEmailError();
   });
 
-  test('TC_LOG_05: Пустой пароль', async ({ page }) => {
-    await page.fill(selectors.emailInput, 'user1@mail.ru');
-    await page.fill(selectors.passwordInput, '');
-    await page.click(selectors.submitButton);
-
-    await expect(page).toHaveURL(`${BASE_URL}/login`);
-    await expect(page.getByText(selectors.errorPassword)).toBeVisible();
+  test('TC_LOG_05: Пустой пароль @regression', async () => {
+    await loginPage.login(EMAIL, '');
+    await loginPage.expectPasswordError();
   });
 
   // BUG-03: Фронтенд не проверяет формат email на странице входа
   // Ожидается: ошибка валидации на фронтенде до отправки запроса
   // Фактически: форма отправляется, сервер возвращает "Неверный email или пароль"
   // TODO: добавить проверку фронтенд-валидации после исправления
-  test('TC_LOG_06: Невалидный формат email', async ({ page }) => {
-    await page.fill(selectors.emailInput, 'test');
-    await page.fill(selectors.passwordInput, '12345678');
-    await page.click(selectors.submitButton);
-
-    await expect(page).toHaveURL(`${BASE_URL}/login`);
-    await expect(page.getByText(selectors.errorMessage)).toBeVisible();
+  test('TC_LOG_06: Невалидный формат email @regression', async () => {
+    await loginPage.login('test', PASSWORD);
+    await loginPage.expectErrorOnPage();
   });
 
-  test('TC_LOG_07: Оба поля пустые', async ({ page }) => {
-    await page.fill(selectors.emailInput, '');
-    await page.fill(selectors.passwordInput, '');
-    await page.click(selectors.submitButton);
-
-    await expect(page).toHaveURL(`${BASE_URL}/login`);
-    await expect(page.getByText(selectors.errorEmail)).toBeVisible();
-    await expect(page.getByText(selectors.errorPassword)).toBeVisible();
+  test('TC_LOG_07: Оба поля пустые @regression', async () => {
+    await loginPage.login('', '');
+    await loginPage.expectEmailError();
+    await loginPage.expectPasswordError();
   });
 
-  test('TC_LOG_08: SQL injection в email', async ({ page }) => {
-    await page.fill(selectors.emailInput, "'' OR '1'=1");
-    await page.fill(selectors.passwordInput, "'' OR '1'=1");
-    await page.click(selectors.submitButton);
-
-    await expect(page).toHaveURL(`${BASE_URL}/login`);
-    await expect(page.getByText(selectors.errorMessage)).toBeVisible();
+  test('TC_LOG_08: SQL инъекция @regression', async () => {
+    await loginPage.login(`' OR '1'='1`, `' OR '1'='1`);
+    await loginPage.expectErrorOnPage();
   });
 });
