@@ -48,7 +48,9 @@ test.describe('Orders Tests', () => {
     test('ORD-04: Кнопка "Оформить заказ" неактивна при пустой корзине @regression', async ({
       page,
     }) => {
+      
       const cartPage = new CartPage(page);
+      await cartPage.clearCart();
       await cartPage.goToCart();
       await cartPage.expectEmptyCart();
 
