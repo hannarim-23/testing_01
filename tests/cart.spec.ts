@@ -7,7 +7,6 @@ const EMAIL = process.env.TEST_USER_EMAIL;
 const PASSWORD = process.env.TEST_USER_PASSWORD;
 
 const PRODUCT_NAME = 'iPad Pro 11';
-const PRODUCT_NAME2 = 'iPhone 15 Pro';
 const PRODUCT_HREF1 = '/product/51'; // iPhone 15 Pro
 const PRODUCT_HREF2 = '/product/54'; // iPad Pro 11
 
@@ -73,28 +72,21 @@ test.describe('Cart Tests', () => {
   test('TC_CART_05: Общая сумма пересчитывается @regression', async () => {
     await cartPage.clearCart();
 
-    // Добавляем товары через href (на главной странице)
     await catalogPage.addProductByHref(PRODUCT_HREF1);
     await catalogPage.addProductByHref(PRODUCT_HREF2);
-
-    // Переходим в корзину
     await cartPage.goToCart();
 
-    // Получаем общую сумму из корзины
     const totalText = await cartPage.getTotalPrice();
     const cartTotal = parseFloat(
       totalText?.replace(/[^\d.,]/g, '').replace(',', '.') || '0'
     );
 
-    // Ожидаемая сумма (цены товаров)
     const expectedTotal = 999.99 + 799.0;
-
-    // Округляем для сравнения
     const roundedActual = Math.round(cartTotal * 100) / 100;
     const roundedExpected = Math.round(expectedTotal * 100) / 100;
 
-    console.log(`💰 Ожидаемая сумма: ${roundedExpected}`);
-    console.log(`💰 Фактическая сумма: ${roundedActual}`);
+    console.log(` Ожидаемая сумма: ${roundedExpected}`);
+    console.log(` Фактическая сумма: ${roundedActual}`);
 
     expect(roundedActual).toBe(roundedExpected);
   });
@@ -106,71 +98,28 @@ test.describe('Cart Tests', () => {
     await cartPage.expectOrderSuccess();
     await expect(cartPage.page).toHaveURL('/');
   });
-});
 
-/*
   // BUG-07: Система нестабильна при добавлении >20 товаров в корзину
   // Ожидание: стабильная работа с 50 товарами
   // Факт: падение на 10-25 товарах
   // TODO: уточнить требования и исправить
-  test('TC_CART_07: Огромное количество товара"', async ({ page }) => {
-    await clearCart(page); //принудительная очистка корзины
-    await page.goto(`${BASE_URL}`);
-    await page.waitForLoadState('networkidle');
-
-    const products = await page.locator(selectors.productCard).all();
-    console.log(`✅ products = `, products.length);
+  test('TC_CART_07: Добавление первых 5 товаров @regression', async () => {
+    await catalogPage.page.waitForLoadState('networkidle');
 
     let totalPrice = 0;
-    const errors: number[] = [];
 
     for (let i = 0; i < 5; i++) {
-      //после исправления бага изменить i < 5 => на i < products.length или 50
-
-      try {
-        const addButton = products[i].locator(selectors.addToCartButton);
-        //await addButton.click();
-        await expect(addButton).toBeEnabled({ timeout: 1000 });
-        await addButton.click();
-
-        const priceText = await products[i]
-          .locator(selectors.productPrice)
-          .first()
-          .textContent();
-        const price = parseFloat(
-          priceText?.replace(/\s/g, '').split(' ')[0]?.replace(',', '.') || '0'
-        );
-        totalPrice = Math.round((totalPrice + price) * 100) / 100;
-        console.log(`💰 Цена товара ${i + 1}: ${price}`);
-
-        // Небольшая задержка между добавлениями
-        await page.waitForTimeout(1000);
-      } catch (error) {
-        console.log(`❌ Товар ${i + 1}: НЕ добавлен`);
-        errors.push(i + 1);
-      }
+      const price = await catalogPage.addProductByIndexAndGetPrice(i);
+      totalPrice += price;
+      console.log(`Товар ${i + 1}: ${price}`);
+      await cartPage.page.waitForTimeout(300);
     }
 
-    console.log(`\n💰 Общая сумма всех товаров: ${totalPrice}`);
-    console.log(`❌ Не добавлено товаров: ${errors.length}`);
+    await cartPage.goToCart();
+    const cartTotal = await cartPage.getCartTotalPrice();
 
-    if (errors.length > 0) {
-      console.log(`Проблемные товары: ${errors.join(', ')}`);
-    }
+    console.log(`Сумма товаров: ${totalPrice}, Итого в корзине: ${cartTotal}`);
 
-    // Переходим в корзину
-    await page.click(selectors.cartIcon);
-    await page.waitForLoadState('networkidle');
-
-    const totalInCart = await page.locator(selectors.totalPrice).textContent();
-    const cartTotal = parseFloat(
-      totalInCart?.split(' ')[0]?.replace(',', '.') || '0'
-    );
-
-    console.log(`💰 Итого в корзине: ${cartTotal}`);
-
-    expect(errors.length).toBe(0);
     expect(cartTotal).toBe(totalPrice);
   });
 });
-*/

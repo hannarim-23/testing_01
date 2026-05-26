@@ -1,5 +1,5 @@
 import { Page, Locator, expect } from '@playwright/test';
-import { selectors } from '../helpers/selectors';
+//import { selectors } from '../helpers/selectors';
 
 export class RegisterPage {
   readonly page: Page;
@@ -24,13 +24,13 @@ export class RegisterPage {
   constructor(page: Page) {
     this.page = page;
 
-    this.firstnameInput = page.locator(selectors.firstnameInput);
-    this.lastnameInput = page.locator(selectors.lastnameInput);
-    this.emailInput = page.locator(selectors.emailInput);
-    this.usernameInput = page.locator(selectors.usernameInput);
-    this.phoneInput = page.locator(selectors.phoneInput);
-    this.passwordInput = page.locator(selectors.passwordInput);
-    this.submitButton = page.locator(selectors.submitButton);
+    this.firstnameInput = page.locator('input[name="firstname"]');
+    this.lastnameInput = page.locator('input[name="lastname"]');
+    this.emailInput = page.locator('input[name="email"]');
+    this.usernameInput = page.locator('input[name="username"]');
+    this.phoneInput = page.locator('input[name="phoneNumber"]');
+    this.passwordInput = page.locator('input[name="password"]');
+    this.submitButton = page.locator('button[type="submit"]');
 
     // Ошибки обязательных полей
     this.firstnameError = page.getByText('Имя обязательно');
@@ -90,17 +90,17 @@ export class RegisterPage {
   async expectPhoneFormatError() {
     await expect(this.phoneFormatError).toBeVisible();
   }
-  
-//08
+
+  //08
   async getEmailValue() {
     return await this.emailInput.inputValue();
-}
+  }
 
-async fillEmail(email: string) {
+  async fillEmail(email: string) {
     await this.emailInput.fill(email);
-}
+  }
 
-async expectRedirectToLogin() {
+  async expectRedirectToLogin() {
     await expect(this.page).toHaveURL('/login');
-}
+  }
 }
