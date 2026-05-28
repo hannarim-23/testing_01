@@ -40,6 +40,7 @@ export class CartPage {
   }
 
   async getTotalPrice() {
+    await this.page.waitForLoadState('networkidle');
     await expect(this.totalPrice).toBeVisible();
     return await this.totalPrice.textContent();
   }

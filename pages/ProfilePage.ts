@@ -14,6 +14,7 @@ export class ProfilePage {
   readonly buttonSVG: Locator;
   readonly successMessage: Locator;
   readonly errorEmail: Locator;
+  readonly buttonProfile: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -25,14 +26,13 @@ export class ProfilePage {
     this.saveButton = page.getByText('Сохранить изменения');
     this.ordersLink = page.getByText('История заказов');
     this.logoutButton = page.getByText('Выйти');
-    this.buttonSVG = page.locator(
-      'button:has(svg[xmlns="http://www.w3.org/2000/svg"])'
-    );
     this.successMessage = page.getByText('Профиль успешно обновлен!');
     this.errorMessage = page.getByText(
       'phoneNumber must be a valid phone number,phoneNumber must be in international format (starting with +)'
     );
     this.errorEmail = page.getByText('Email "user1@mail.ru" already exists.');
+
+    this.buttonProfile = page.locator('[aria-haspopup="menu"]');
   }
 
   async goto() {
@@ -92,6 +92,7 @@ export class ProfilePage {
   }
 
   async logout() {
+    await expect(this.logoutButton).toBeVisible();
     await this.logoutButton.click();
   }
 
@@ -102,7 +103,7 @@ export class ProfilePage {
   }
 
   async clickProfile() {
-    await this.buttonSVG.click();
+    await this.buttonProfile.click();
   }
   async goToOrders() {
     await this.ordersLink.click();

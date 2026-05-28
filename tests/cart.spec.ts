@@ -8,7 +8,7 @@ const PASSWORD = process.env.TEST_USER_PASSWORD;
 
 const PRODUCT_NAME = 'iPad Pro 11';
 const PRODUCT_HREF1 = '/product/51'; // iPhone 15 Pro
-const PRODUCT_HREF2 = '/product/54'; // iPad Pro 11
+const PRODUCT_HREF2 = '/product/59'; // Apple Watch S9
 
 if (!EMAIL || !PASSWORD) {
   throw new Error('❌ Missing environment variables. Check .env file');
@@ -81,7 +81,7 @@ test.describe('Cart Tests', () => {
       totalText?.replace(/[^\d.,]/g, '').replace(',', '.') || '0'
     );
 
-    const expectedTotal = 999.99 + 799.0;
+    const expectedTotal = 999.99 + 399;
     const roundedActual = Math.round(cartTotal * 100) / 100;
     const roundedExpected = Math.round(expectedTotal * 100) / 100;
 
@@ -114,6 +114,7 @@ test.describe('Cart Tests', () => {
       console.log(`Товар ${i + 1}: ${price}`);
       await cartPage.page.waitForTimeout(300);
     }
+    totalPrice =  Math.round(totalPrice * 100) / 100;
 
     await cartPage.goToCart();
     const cartTotal = await cartPage.getCartTotalPrice();
@@ -121,5 +122,6 @@ test.describe('Cart Tests', () => {
     console.log(`Сумма товаров: ${totalPrice}, Итого в корзине: ${cartTotal}`);
 
     expect(cartTotal).toBe(totalPrice);
+    //    expect(cartTotal).toBeCloseTo(totalPrice, 2); //альтернатива, округление внутри
   });
 });
