@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { CartPage } from '../pages/CartPage';
-import { CatalogPage } from '../pages/CatalogPage';
-import { LoginPage } from '../pages/LoginPage';
+import { CartPage } from '../../pages/UI/CartPage';
+import { CatalogPage } from '../../pages/UI/CatalogPage';
+import { LoginPage } from '../../pages/UI/LoginPage';
 
 const EMAIL = process.env.TEST_USER_EMAIL;
 const PASSWORD = process.env.TEST_USER_PASSWORD;
@@ -114,7 +114,7 @@ test.describe('Cart Tests', () => {
       console.log(`Товар ${i + 1}: ${price}`);
       await cartPage.page.waitForTimeout(300);
     }
-    totalPrice =  Math.round(totalPrice * 100) / 100;
+    totalPrice = Math.round(totalPrice * 100) / 100;
 
     await cartPage.goToCart();
     const cartTotal = await cartPage.getCartTotalPrice();

@@ -104,7 +104,7 @@ export class AdminPage {
     await expect(this.page).toHaveURL('/');
   }
 
-  async logout() {
+  async logout() {/*
     const logoutButton = this.page.locator('button:has-text("Выйти")');
       if (await logoutButton.isVisible().catch(() => false)) {
         await logoutButton.click();
@@ -114,10 +114,10 @@ export class AdminPage {
         await this.logoutButton.click();
     }
     
-    await this.page.waitForLoadState('networkidle');
-    /*
+    await this.page.waitForLoadState('networkidle');*/
+    
     await this.buttonProfile.click();
-    await this.logoutButton.click();*/
+    await this.logoutButton.click();
   }
 
   async expectNotLoggedIn() {

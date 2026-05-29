@@ -1,8 +1,8 @@
+import { RegisterPage } from './../../pages/UI/RegisterPage';
 import { test, expect } from '@playwright/test';
-import { ProfilePage } from '../pages/ProfilePage';
-import { LoginPage } from '../pages/LoginPage';
-import { getTestUser } from '../helpers/testData';
-import { RegisterPage } from '../pages/RegisterPage';
+import {ProfilePage} from '../../pages/UI/ProfilePage';
+import { LoginPage } from '../../pages/UI/LoginPage';
+import { getTestUser } from '../../helpers/testData';
 
 const EMAIL = process.env.TEST_USER_EMAIL;
 const PASSWORD = process.env.TEST_USER_PASSWORD;

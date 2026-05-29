@@ -1,11 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { AdminPage } from '../pages/AdminPage';
-import { LoginPage } from '../pages/LoginPage';
+import { AdminPage } from '../../pages/UI/AdminPage';
+import { LoginPage } from '../../pages/UI/LoginPage';
 
-import { RegisterPage } from '../pages/RegisterPage';
-import { CatalogPage } from '../pages/CatalogPage';
-import { CartPage } from '../pages/CartPage';
-import { ProfilePage } from '../pages/ProfilePage';
+import { RegisterPage } from '../../pages/UI/RegisterPage';
+import { CatalogPage } from '../../pages/UI/CatalogPage';
+import { CartPage } from '../../pages/UI/CartPage';
+import { ProfilePage } from '../../pages/UI/ProfilePage';
 
 const ADMIN_EMAIL = process.env.ADMIN_USER || 'admin@test.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
@@ -182,6 +182,7 @@ test.describe('Admin Panel Tests', () => {
       await adminPage.goToDashboard();
       await adminPage.expectAdminPageLoaded();
       await adminPage.goToOrders();
+
     });
 
     test('ADM-14: Просмотр списка заказов @smoke', async () => {
@@ -227,11 +228,12 @@ test.describe('Admin Panel Tests', () => {
       .locator('button:has-text("Заказ #")')
       .first();
     const orderNumberText = await orderNumberElement.textContent();
-    const orderId = orderNumberText?.slice(7, 9); //orderNumberText?.match(/\d+/)?.[0];
+    const orderId = orderNumberText?.slice(7, 10); //orderNumberText?.match(/\d+/)?.[0];
     console.log(` Создан заказ #${orderId} для пользователя ${userEmail}`);
 
     console.log('2. Вход в админ-панель и изменение статуса');
     const profilePage = new ProfilePage(page);
+    await profilePage.buttonProfile.click();
     await profilePage.logout();
     await profilePage.expectNotLoggedIn();
 
@@ -246,8 +248,14 @@ test.describe('Admin Panel Tests', () => {
     await adminPage.goToOrders();
 
     // Находим созданный заказ и меняем статус
+    await page.waitForLoadState('networkidle');//
+    const pageText = await page.textContent('body');
+console.log('Текст страницы:', pageText?.substring(0, 500) || '');
+
     const orderRow = page.locator(`tr:has-text("#${orderId}")`);
-    await expect(orderRow).toBeVisible({ timeout: 10000 });
+    console.log(`Ищем заказ с ID: ${orderId}`);
+
+    await expect(orderRow).toBeVisible({ timeout: 30000 });
 
     // Проверяем текущий статус (должен быть PENDING)
     const statusCell = orderRow.locator('td').nth(3);

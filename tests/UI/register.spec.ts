@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { getTestUser } from '../helpers/testData';
-import { RegisterPage } from '../pages/RegisterPage';
+import { getTestUser } from '../../helpers/testData';
+import { RegisterPage } from '../../pages/UI/RegisterPage';
 
 //const BASE_URL = process.env.BASE_URL;
 const EMAIL = process.env.TEST_USER_EMAIL;

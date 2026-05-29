@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { CatalogPage } from '../pages/CatalogPage';
-import { LoginPage } from '../pages/LoginPage';
+import { CatalogPage } from '../../pages/UI/CatalogPage';
+import { LoginPage } from '../../pages/UI/LoginPage';
 
 const EMAIL = process.env.TEST_USER_EMAIL;
 const PASSWORD = process.env.TEST_USER_PASSWORD;

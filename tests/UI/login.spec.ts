@@ -1,5 +1,5 @@
 import { test } from '@playwright/test';
-import { LoginPage } from '../pages/LoginPage';
+import { LoginPage } from '../../pages/UI/LoginPage';
 
 const BASE_URL = process.env.BASE_URL; //baseURL в конфиге, поэтому не обязателен
 const EMAIL = process.env.TEST_USER_EMAIL;

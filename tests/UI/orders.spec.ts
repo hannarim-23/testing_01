@@ -1,9 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { OrdersPage } from '../pages/OrdersPage';
-import { LoginPage } from '../pages/LoginPage';
-import { CartPage } from '../pages/CartPage';
-import { getTestUser } from '../helpers/testData';
-import { RegisterPage } from '../pages/RegisterPage';
+import { OrdersPage } from '../../pages/UI/OrdersPage';
+import { LoginPage } from '../../pages/UI/LoginPage';
+import { CartPage } from '../../pages/UI/CartPage';
+import { getTestUser } from '../../helpers/testData';
+import { RegisterPage } from '../../pages/UI/RegisterPage';
 
 const EMAIL = process.env.TEST_USER_EMAIL;
 const PASSWORD = process.env.TEST_USER_PASSWORD;
@@ -48,7 +48,6 @@ test.describe('Orders Tests', () => {
     test('ORD-04: Кнопка "Оформить заказ" неактивна при пустой корзине @regression', async ({
       page,
     }) => {
-      
       const cartPage = new CartPage(page);
       await cartPage.clearCart();
       await cartPage.goToCart();
