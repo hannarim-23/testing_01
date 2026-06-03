@@ -10,7 +10,7 @@ const invalid = 99999;
 
 test.describe('API: Auth', () => {
   const createdUserIds: number[] = [];
-
+//после добавления Эндпоинта на очистку, реализовать
   test.afterEach(async () => {
     if (createdUserIds.length > 0) {
       console.log(`📦 Создано пользователей: ${createdUserIds.length}`);

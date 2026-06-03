@@ -11,6 +11,8 @@ const newWarehouse = () => {
 };
 
 test.describe('API: WAREHOUSE', () => {
+  //после добавления Эндпоинта на очистку, реализовать
+  
   test('API-01_1: POST /warehouse — создание нового warehouse', async ({
     request,
   }) => {

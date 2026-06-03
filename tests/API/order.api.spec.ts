@@ -7,6 +7,7 @@ const productId = 5;
 
 test.describe('API: ORDER', () => {
 
+  //после добавления Эндпоинта на очистку, реализовать
   const createdOrderIds: number[] = [];
   test.afterEach(async () => {
       if (createdOrderIds.length > 0) {
