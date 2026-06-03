@@ -31,6 +31,7 @@
 | Документ | Ссылка |
 |----------|--------|
 | 📋 Тест-кейсы | [Google Sheets](https://docs.google.com/spreadsheets/d/1u1dCoyHw37pAoo-l4Zj26TGODuicxdX8tlhUBk80ov0/edit?usp=drive_link) |
+| 📋 Тест-кейсы (API) | [Google Sheets](https://docs.google.com/spreadsheets/d/19kbq7m6ax8NYorvMUyTw1rv_bfPI9GJiAG02hVRpqcw/edit?usp=sharing) |
 | 🐛 Баг-репорты | [Google Sheets](https://docs.google.com/spreadsheets/d/1p_Gl-lFvZYtHaIWieLmVmndG46sHGSoXlgO8x3EUK8c/edit?usp=drive_link) |
 
 > *Тест-кейсы и баг-репорты хранятся в Google Sheets для удобства совместной работы.*

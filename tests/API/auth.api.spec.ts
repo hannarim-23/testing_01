@@ -1,44 +1,37 @@
 import { test, expect } from '@playwright/test';
-
-const newUser = () => {
-  const timestamp = Date.now();
-  return {
-    firstname: 'Ivan',
-    lastname: 'Ivanov',
-    phoneNumber: `+37529${timestamp}`.slice(0, 13),
-    email: `ivan.ivanov.${timestamp}@example.com`,
-    username: `ivan_ivanov_${timestamp}`,
-    password: '12345678',
-    role: 'USER',
-  };
-};
+import { newUser } from '../../helpers/newUser';
 
 const API_URL = process.env.API_URL;
-const TEST_USER_EMAIL = 'user1@mail.ru';
-const TEST_USER_PASSWORD = '12345678';
-const ADMIN_USER = 'admin@test.com';
-const ADMIN_PASSWORD = 'admin123';
+const ADMIN_USER = process.env.ADMIN_USER;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const TEST_USER_EMAIL = process.env.TEST_USER_EMAIL;
+const TEST_USER_PASSWORD = process.env.TEST_USER_PASSWORD;
+const invalid = 99999;
 
 test.describe('API: Auth', () => {
+  const createdUserIds: number[] = [];
+
+  test.afterEach(async () => {
+    if (createdUserIds.length > 0) {
+      console.log(`📦 Создано пользователей: ${createdUserIds.length}`);
+      console.log(` IDs: ${createdUserIds.join(', ')}`);
+      console.log(`⚠️ Очистка не реализована (нет DELETE /auth/{id})`);
+      createdUserIds.length = 0;
+    }
+  });
 
   test('API-01_1: POST /auth/register — успешная регистрация', async ({
     request,
   }) => {
-    // 1. Генерируем уникальные данные
     const userData = newUser();
-
-    // 2. Отправляем POST-запрос
     const response = await request.post(`${API_URL}/auth/register`, {
       data: userData,
     });
 
-    // 3. Проверяем статус ответа
     expect(response.status()).toBe(201);
 
-    // 4. Проверяем тело ответа
     const responseBody = await response.json();
 
-    // 5. Проверяем, что вернулись нужные поля
     expect(responseBody).toHaveProperty('id');
     expect(responseBody).toHaveProperty('email');
     expect(responseBody).toHaveProperty('firstname');
@@ -46,15 +39,16 @@ test.describe('API: Auth', () => {
     expect(responseBody).toHaveProperty('username');
     expect(responseBody).toHaveProperty('role');
 
-    // 6. Проверяем, что данные совпадают с отправленными
     expect(responseBody.email).toBe(userData.email);
     expect(responseBody.firstname).toBe(userData.firstname);
     expect(responseBody.username).toBe(userData.username);
     expect(responseBody.role).toBe(userData.role);
 
-    // 7. Проверяем, что вернулся id (число)
     expect(typeof responseBody.id).toBe('number');
     expect(responseBody.id).toBeGreaterThan(0);
+
+    const createdUser = await response.json();
+    createdUserIds.push(createdUser.id); // запоминаем для удаления
   });
 
   test('API-01_2: POST /auth/register — ошибочная регистрация (существующий email)', async ({
@@ -65,7 +59,7 @@ test.describe('API: Auth', () => {
       firstname: 'Ivan',
       lastname: 'Ivanov',
       phoneNumber: '+1234567890',
-      email: 'ivan.ivanov@example.com', // уже существует
+      email: 'user1@test.com', // уже существует
       username: 'ivan_ivanov_unique',
       password: 'password123',
       role: 'USER',
@@ -97,9 +91,7 @@ test.describe('API: Auth', () => {
     expect(responseBody.id).toBeGreaterThan(0);
   });
 
-  test('API-02_2: POST /auth/login — вход АДМИНА', async ({
-    request,
-  }) => {
+  test('API-02_2: POST /auth/login — вход АДМИНА', async ({ request }) => {
     const response = await request.post(`${API_URL}/auth/login`, {
       data: { email: ADMIN_USER, password: ADMIN_PASSWORD },
     });
@@ -150,12 +142,15 @@ test.describe('API: Auth', () => {
 
     expect(updateResponse.status()).toBe(200);
     const updateResponseBody = await updateResponse.json();
-    expect(updateResponseBody).toHaveProperty('id');
-    expect(updateResponseBody).toHaveProperty('email');
-    expect(updateResponseBody).toHaveProperty('firstname');
-    expect(updateResponseBody).toHaveProperty('lastname');
-    expect(updateResponseBody).toHaveProperty('username');
-    expect(updateResponseBody).toHaveProperty('role');
+
+    expect(updateResponseBody.firstname).toBe(updateData.firstname);
+    expect(updateResponseBody.lastname).toBe(updateData.lastname);
+    expect(updateResponseBody.email).toBe(updateData.email);
+    expect(updateResponseBody.username).toBe(updateData.username);
+    expect(updateResponseBody.phoneNumber).toBe(updateData.phoneNumber);
+
+    const createdUser = await response.json();
+    createdUserIds.push(createdUser.id); // запоминаем для удаления
   });
 
   test('API-03_2: PATCH /auth/{userID} — Обновить данные(пользователь не найден) ', async ({
@@ -169,20 +164,31 @@ test.describe('API: Auth', () => {
       username: `ivan_ivanov_${Date.now()}`,
     };
 
-    const updateResponse = await request.patch(`${API_URL}/auth/${9999999}`, {
+    const updateResponse = await request.patch(`${API_URL}/auth/${invalid}`, {
       data: updateData,
     });
 
     const updateResponseBody = await updateResponse.json();
     expect(updateResponse.status()).toBe(404);
     expect(updateResponseBody.message).toContain(
-      `User with ID ${9999999} not found`
+      `User with ID ${invalid} not found`
     );
   });
 
   test('API-03_3: PATCH /auth/{userID} — Обновить данные(пользователь с таким Email or username существует) ', async ({
     request,
   }) => {
+
+    const userData = newUser();
+    const response = await request.post(`${API_URL}/auth/register`, {
+      data: userData,
+    });
+
+    expect(response.status()).toBe(201);
+
+    const responseBody = await response.json();
+    const updateId = responseBody.id;
+
     const updateData = {
       firstname: 'Ivan',
       lastname: 'Ivanov',
@@ -191,7 +197,7 @@ test.describe('API: Auth', () => {
       username: `ivan_ivanov_${Date.now()}`,
     };
 
-    const updateResponse = await request.patch(`${API_URL}/auth/${1}`, {
+    const updateResponse = await request.patch(`${API_URL}/auth/${updateId}`, {
       data: updateData,
     });
 
@@ -200,5 +206,7 @@ test.describe('API: Auth', () => {
     expect(updateResponseBody.message).toContain(
       `Email "user1@mail.ru" already exists.`
     );
+
+    createdUserIds.push(updateId); // запоминаем для удаления
   });
 });

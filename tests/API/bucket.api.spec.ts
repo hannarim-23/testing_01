@@ -1,16 +1,18 @@
 import { test, expect } from '@playwright/test';
-//import { clearBucket } from '../../helpers/cleanup';
+import { clearBucket } from '../../helpers/cleanup';
 
-const API_URL = process.env.API_URL; //скрытый, создан глобально
+const API_URL = process.env.API_URL;
 const invalidUser = 0;
 const userId = 1; // корзина админа
-const invalid = 999999; //не валидный товар
+const invalid = 999999; 
+const productId = 5;
+const productIds = [10, 11, 12];
 
 test.describe('API: BUCKET', () => {
-/*  test.afterEach(async ({ request }) => {
+  test.afterEach(async ({ request }) => {
     await clearBucket(request, userId);
   });
-*/
+
   test('API-01_1: GET /bucket/{userId} — получить корзину юзера', async ({
     request,
   }) => {
@@ -40,8 +42,6 @@ test.describe('API: BUCKET', () => {
   test('API-02_1: POST /bucket/{userId}/addProduct — добавить товар в корзину юзера', async ({
     request,
   }) => {
-    const productId = 150;
-
     const response = await request.post(
       `${API_URL}/bucket/${userId}/addProduct`,
       {
@@ -61,8 +61,6 @@ test.describe('API: BUCKET', () => {
   test('API-02_2: POST /bucket/{userId}/addProduct — добавить НЕСКОЛЬКО товаров в корзину юзера', async ({
     request,
   }) => {
-    const productIds = [150, 151, 152];
-
     for (const productId of productIds) {
       const response = await request.post(
         `${API_URL}/bucket/${userId}/addProduct`,
@@ -79,7 +77,7 @@ test.describe('API: BUCKET', () => {
   test('API-02_3: POST /bucket/{userId}/addProduct — добавить товар в корзину юзера(негативный)', async ({
     request,
   }) => {
-    const productId = 6; //товара с таки id не существует
+    const productId = invalid;
 
     const response = await request.post(
       `${API_URL}/bucket/${userId}/addProduct`,
@@ -94,8 +92,6 @@ test.describe('API: BUCKET', () => {
   test('API-03_1: DELETE /bucket/{userId}/removeProduct — удаление товара из корзины юзера', async ({
     request,
   }) => {
-    const productId = 110;
-
     const response = await request.post(
       `${API_URL}/bucket/${userId}/addProduct`,
       {
@@ -103,7 +99,8 @@ test.describe('API: BUCKET', () => {
       }
     );
 
-    expect(response.status()).toBe(201); //добавили
+    //добавили
+    expect(response.status()).toBe(201);
     const responseBody = await response.json();
     console.log(`Товар ${productId} добавлен в корзину`);
     expect(responseBody).toHaveProperty('product_id');
@@ -118,13 +115,17 @@ test.describe('API: BUCKET', () => {
     );
 
     expect(deleteResponse.status()).toBe(200);
+    const bucket = await request.get(`${API_URL}/bucket/${userId}`);
+    const bucketData = await bucket.json();
+    const productRemoved = !bucketData.products.some(
+      (p) => p.product_id === productId
+    );
+    expect(productRemoved).toBe(true);
   });
 
   test('API-03_2: DELETE /bucket/{userId}/removeProduct — удаление товара из корзины юзера (негативный)', async ({
     request,
   }) => {
-    const productId = 115;
-
     const response = await request.post(
       `${API_URL}/bucket/${userId}/addProduct`,
       {
@@ -149,7 +150,7 @@ test.describe('API: BUCKET', () => {
 
     //удаляем не правильный товар
     const deleteResponseProduct = await request.delete(
-      `${API_URL}/bucket/${userId}/removeProduct${invalid}`
+      `${API_URL}/bucket/${userId}/removeProduct/${invalid}`
     );
     expect(deleteResponseProduct.status()).toBe(404);
   });

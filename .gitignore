@@ -7,3 +7,8 @@ node_modules/
 /playwright/.cache/
 /playwright/.auth/
 .env
+<<<<<<< HEAD
+=======
+# Временные и исследовательские тесты
+/tests/API/testForTestapispectsts
+>>>>>>> ffe5324 (refactor all API tests)

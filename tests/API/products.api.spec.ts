@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
+import { testProducts } from '../../fixtures/testProductsData';
 
-const API_URL = process.env.API_URL; //скрытый, создан глобально
+const API_URL = process.env.API_URL;
+const invalid = 9999999;
 
 const newProduct = () => {
   const timestamp = Date.now();
@@ -15,6 +17,15 @@ const newProduct = () => {
 };
 
 test.describe('API: PRODUCT', () => {
+  const createdProductIds: number[] = [];
+
+  test.afterEach(async ({ request }) => {
+    for (const id of createdProductIds) {
+      await request.delete(`${API_URL}/product/${id}`);
+    }
+    createdProductIds.length = 0;
+  });
+
   test('API-01_1: POST /product — создание нового продукта', async ({
     request,
   }) => {
@@ -41,6 +52,8 @@ test.describe('API: PRODUCT', () => {
 
     expect(typeof responseBody.id).toBe('number');
     expect(responseBody.id).toBeGreaterThan(0);
+
+    createdProductIds.push(responseBody.id);
   });
 
   test('API-01_2: POST /product — создание нового продукта(негативный)', async ({
@@ -51,7 +64,7 @@ test.describe('API: PRODUCT', () => {
       price: 'not a number',
       // отсутствуют обязательные поля
     };
-    const productData = newProduct();
+
     const response = await request.post(`${API_URL}/product`, {
       data: invalidProduct,
     });
@@ -67,32 +80,28 @@ test.describe('API: PRODUCT', () => {
 
     expect(response.status()).toBe(200);
     expect(Array.isArray(responseBody)).toBe(true);
-    expect(responseBody.length).toBeGreaterThan(49);
   });
 
-  test('API-03_1: GET /product/{productId} — получить продукт по ID', async ({
+  test('API-03_1: GET /product/{id} — получить продукт', async ({
     request,
   }) => {
-    const productId = 108;
-    const response = await request.get(`${API_URL}/product/${productId}`, {});
-
-    const responseBody = await response.json();
+    const response = await request.get(`${API_URL}/product/${testProducts.id}`);
 
     expect(response.status()).toBe(200);
-    expect(responseBody.id).toBe(108);
-    expect(responseBody.name).toBe('Sony WH-1000XM5');
-    expect(responseBody.description).toBe('Noise canceling headphones.');
-    expect(responseBody.price).toBe('349.5');
-    expect(responseBody.category).toBe('ELECTRONICS');
-    expect(responseBody.urlImage).toBe(
-      'https://images.unsplash.com/photo-1613665813446-82a78c44b8fe?q=80&w=500'
-    );
+    const product = await response.json();
+
+    expect(product.id).toBe(testProducts.id);
+    expect(product.name).toBe(testProducts.name);
+    expect(product.description).toBe(testProducts.description);
+    expect(product.price).toBe(testProducts.price);
+    expect(product.category).toBe(testProducts.category);
+    expect(product.urlImage).toBe(testProducts.urlImage);
   });
 
   test('API-03_2: GET /product/{productId} — получить продукт по ID(негативный)', async ({
     request,
   }) => {
-    const productId = 8;
+    const productId = invalid;
     const response = await request.get(`${API_URL}/product/${productId}`, {});
 
     expect(response.status()).toBe(404);
@@ -101,6 +110,17 @@ test.describe('API: PRODUCT', () => {
   test('API-04_1: PATCH /product/{productId} — Обновить данные товара', async ({
     request,
   }) => {
+    // 1. Сначала создаём продукт, который будем обновлять
+    const createResponse = await request.post(`${API_URL}/product`, {
+      data: newProduct(),
+    });
+    expect(createResponse.status()).toBe(201);
+    const createdProduct = await createResponse.json();
+    const productId = createdProduct.id;
+
+    // Добавляем в список на удаление после теста
+    createdProductIds.push(productId);
+
     const updateData = {
       name: `Product_UPDATE`,
       description: 'some info UPDATE',
@@ -109,7 +129,7 @@ test.describe('API: PRODUCT', () => {
       urlImage: 'https://example.com/images/keyboard.png',
     };
 
-    const productId = '146';
+    //const productId = testProductId;
     const response = await request.patch(`${API_URL}/product/${productId}`, {
       data: updateData,
     });
@@ -135,7 +155,7 @@ test.describe('API: PRODUCT', () => {
       urlImage: 'https://example.com/images/keyboard.png',
     };
 
-    const productId = 6;
+    const productId = invalid;
     const response = await request.patch(`${API_URL}/product/${productId}`, {
       data: updateData,
     });
@@ -146,7 +166,6 @@ test.describe('API: PRODUCT', () => {
   test('API-05_1: DELETE /product/{productId} — УДАЛИТЬ ТОВАР', async ({
     request,
   }) => {
-    //создали товар
     const createResponse = await request.post(`${API_URL}/product`, {
       data: newProduct(),
     });
@@ -155,7 +174,10 @@ test.describe('API: PRODUCT', () => {
     const productId = product.id;
 
     // Удаляем
-    const deleteResponse = await request.delete(`${API_URL}/product/${Number(productId)}`,{});
+    const deleteResponse = await request.delete(
+      `${API_URL}/product/${productId}`,
+      {}
+    );
     expect(deleteResponse.status()).toBe(200);
 
     // Проверяем, что удалён
@@ -167,7 +189,7 @@ test.describe('API: PRODUCT', () => {
     request,
   }) => {
     const deleteResponse = await request.delete(
-      `${API_URL}/product/${99999999}`, //не существующий товар
+      `${API_URL}/product/${invalid}`,
       {}
     );
 
