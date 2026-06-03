@@ -7,4 +7,5 @@ node_modules/
 /playwright/.cache/
 /playwright/.auth/
 .env
-test-for-responceapispectsts
+# Временные и исследовательские тесты
+/tests/API/testForTestapispectsts

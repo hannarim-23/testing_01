@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const API_URL = process.env.API_URL; //скрытый, создан глобально
+const API_URL = process.env.API_URL;
 
 const newWarehouse = () => {
   const timestamp = Date.now();
@@ -45,14 +45,15 @@ test.describe('API: WAREHOUSE', () => {
   test('API-02_2: GET /warehouse/{warehouseId} — получить по ID warehouse', async ({
     request,
   }) => {
-    const testWarehouse = {
-      id: 1,
-      title: 'mogilevпо',
-      address: 'pervomaiskaya 2',
-    };
+
+    const warehouseData = newWarehouse();
+    const responseNew = await request.post(`${API_URL}/warehouse`, {
+      data: warehouseData,
+    });
+    const responseNewBody = await responseNew.json();
 
     const response = await request.get(
-      `${API_URL}/warehouse/${testWarehouse.id}`,
+      `${API_URL}/warehouse/${responseNewBody.id}`,
       {}
     );
     expect(response.status()).toBe(200);
@@ -60,8 +61,8 @@ test.describe('API: WAREHOUSE', () => {
     const responseBody = await response.json();
     expect(responseBody).toHaveProperty('title');
     expect(responseBody).toHaveProperty('address');
-    expect(responseBody.title).toBe(testWarehouse.title);
-    expect(responseBody.address).toBe(testWarehouse.address);
+    expect(responseBody.title).toBe(responseNewBody.title);
+    expect(responseBody.address).toBe(responseNewBody.address);
   });
 
   test('API-03_1: GET /warehouse — получить по ID warehouse(негативный)', async ({
