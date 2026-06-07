@@ -32,7 +32,7 @@ test.describe('Orders Tests', () => {
       const ordersCount = await ordersPage.getOrdersCount();
       expect(ordersCount).toBeGreaterThan(0);
 
-      await ordersPage.clickOnFirstOrder();
+      await ordersPage.clickOnOrderByIndex(0);
       await ordersPage.expectOrderDetailsVisible();
       await ordersPage.expectOrderNumberVisible();
       await ordersPage.expectOrderTotalPriceVisible();

@@ -1,7 +1,7 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { BasePage } from './BasePage';
 
-export class CartPage {
-  readonly page: Page;
+export class CartPage extends BasePage{
   readonly cartIcon: Locator;
   readonly removeButton: Locator;
   readonly totalPrice: Locator;
@@ -12,7 +12,7 @@ export class CartPage {
   readonly orderSuccessMessage: Locator;
 
   constructor(page: Page) {
-    this.page = page;
+    super(page);
     this.cartIcon = page.locator('a[href="/cart"]');
     this.removeButton = page.locator('button:has-text("Удалить")');
     this.totalPrice = page.locator('span:has-text("Итого:") + span');

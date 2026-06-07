@@ -1,16 +1,16 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { BasePage } from './BasePage';
 
-export class OrdersPage {
-  private readonly page: Page;
-  private readonly orderButton: Locator;
-  private readonly emptyOrdersMessage: Locator;
-  private readonly orderDetails: Locator;
-  private readonly orderNumber: Locator;
-  private readonly orderTotalPrice: Locator;
-  private readonly buttonCreateOrder: Locator;
+export class OrdersPage extends BasePage {
+  readonly orderButton: Locator;
+  readonly emptyOrdersMessage: Locator;
+  readonly orderDetails: Locator;
+  readonly orderNumber: Locator;
+  readonly orderTotalPrice: Locator;
+  readonly buttonCreateOrder: Locator;
 
   constructor(page: Page) {
-    this.page = page;
+    super(page);
     this.orderButton = page.locator('button:has-text("Заказ #")');
     this.orderDetails = page.getByText('Состав заказа:');
     this.emptyOrdersMessage = page.getByText('У вас еще нет заказов.');
@@ -28,8 +28,8 @@ export class OrdersPage {
     return this.orderButton.count();
   }
 
-  async clickOnFirstOrder() {
-    await this.orderButton.first().click();
+  async clickOnOrderByIndex(index: number = 0) {
+    await this.orderButton.nth(index).click();
     await this.page.waitForLoadState('networkidle');
   }
 

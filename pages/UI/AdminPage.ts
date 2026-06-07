@@ -1,8 +1,7 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { BasePage } from './BasePage';
 
-export class AdminPage {
-  readonly page: Page;
-
+export class AdminPage extends BasePage {
   // Навигация
   readonly dashboardLink: Locator;
   readonly productsLink: Locator;
@@ -42,7 +41,7 @@ export class AdminPage {
   readonly orderStatusSelect: (orderId: string) => Locator;
 
   constructor(page: Page) {
-    this.page = page;
+    super(page);
     this.buttonProfile = page.locator('button:has-text("ADMIN")');
     this.logoutButton = page.getByText('Выйти');
     this.buttonAdmin = page.locator('a[href*="/admin"]');
@@ -60,7 +59,7 @@ export class AdminPage {
       name: 'Создать товар',
     });
     this.errorAddProduct = page.getByText('Не удалось создать товар');
-    this.succesAddProduct = page.getByText('Товар успещшно добавлен');
+    this.succesAddProduct = page.getByText('Товар успешно создан');
 
     // Форма товара
     this.productNameInput = page.locator(
@@ -94,10 +93,6 @@ export class AdminPage {
       page.locator(`tr:has-text("${orderId}") select`);
   }
 
-  async goto() {
-    await this.page.goto('/');
-    await this.page.waitForLoadState('networkidle');
-  }
   // ========== Авторизация админа ==========
 
   async expectLoggedIn() {
@@ -167,7 +162,7 @@ export class AdminPage {
     name: string;
     description?: string;
     price: string;
-    urlImage?: string;
+    urlImage: string;
     category?: string;
   }) {
     await this.createProductButton.click();
@@ -176,7 +171,7 @@ export class AdminPage {
     await this.productNameInput.fill(product.name);
     await this.productPriceInput.fill(product.price);
     await this.productDescriptionInput.fill(product.description ?? '');
-    await this.productImageInput.fill(product.urlImage ?? '');
+    await this.productImageInput.fill(product.urlImage);
 
     if (product.category) {
       await this.productCategory.click();
@@ -188,16 +183,15 @@ export class AdminPage {
 
     await this.saveButton.click();
     await this.page.waitForLoadState('networkidle');
-    //await expect(this.succesAddProduct).toBeVisible(); //расскоментировать, когда устранится БАГ-08
-    await expect(this.errorAddProduct).toBeVisible(); // закоментировать, когда устранится БАГ-08
+    await expect(this.succesAddProduct).toBeVisible();
   }
 
-  async getProductRow(productName: string) {
+  getProductRow(productName: string) {
     return this.page.locator(`tr:has-text("${productName}")`);
   }
 
   async expectProductInTable(productName: string) {
-    //await expect(this.getProductRow(productName)).toBeVisible();//расскоментировать, когда устранится БАГ-08
+    await expect(this.getProductRow(productName)).toBeVisible();
   }
 
   /*

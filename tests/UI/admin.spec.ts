@@ -15,7 +15,7 @@ const testProduct = {
   name: `Тестовый товар ${Date.now()}`,
   price: `999`,
   category: 'Книги',
-  urlImage: '',
+  urlImage: 'https://images.unsplash.com/photo-1625773143851-4f16a04e8d35?q=80&w=500',
   description: 'some info',
 };
 
@@ -75,13 +75,10 @@ test.describe('Admin Panel Tests', () => {
       await adminPage.countProductsVisible();
     });
 
-    // BUG-08: Невозможно создать новый товар
-    // Ожидается: "Товар успешно создан и отображается в списке товаров"
-    // Фактически: Товар не создаётся.  сохранение не работает
-    // TODO: исправить в соответствии с комментариями в файле AdminPage.ts
     test('ADM-07: Создание нового товара @regression', async () => {
-      await adminPage.createProduct(testProduct);
-      await adminPage.expectProductInTable(testProduct.name);
+      const test = testProduct;
+      await adminPage.createProduct(test);
+      await adminPage.expectProductInTable(test.name);
     });
 
     test('ADM-05: Редактирование товара @regression', async () => {

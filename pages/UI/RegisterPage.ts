@@ -1,8 +1,7 @@
 import { Page, Locator, expect } from '@playwright/test';
-//import { selectors } from '../helpers/selectors';
+import { BasePage } from './BasePage';
 
-export class RegisterPage {
-  readonly page: Page;
+export class RegisterPage extends BasePage {
   readonly firstnameInput: Locator;
   readonly lastnameInput: Locator;
   readonly emailInput: Locator;
@@ -23,7 +22,7 @@ export class RegisterPage {
   readonly template: Locator;
 
   constructor(page: Page) {
-    this.page = page;
+    super(page);
 
     this.firstnameInput = page.locator('input[name="firstname"]');
     this.lastnameInput = page.locator('input[name="lastname"]');
@@ -94,7 +93,6 @@ export class RegisterPage {
     await expect(this.phoneFormatError).toBeVisible();
   }
 
-  //08
   async getEmailValue() {
     return await this.emailInput.inputValue();
   }

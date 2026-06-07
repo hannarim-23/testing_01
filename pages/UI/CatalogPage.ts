@@ -1,7 +1,7 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { BasePage } from './BasePage';
 
-export class CatalogPage {
-  readonly page: Page;
+export class CatalogPage extends BasePage {
   readonly productCard: Locator;
   readonly addToCartButton: Locator;
   readonly cartIcon: Locator;
@@ -12,7 +12,7 @@ export class CatalogPage {
   readonly errorMessageCatalog: Locator;
 
   constructor(page: Page) {
-    this.page = page;
+    super(page);
     this.productCard = page.locator('a[href*="/product/"]');
     this.addToCartButton = page.locator('button:has-text("В корзину")');
     this.cartIcon = page.locator('a[href="/cart"]');
@@ -21,10 +21,6 @@ export class CatalogPage {
     this.errorMessageProduct = page.getByText('Не удалось загрузить продукт');
     this.successMessage = page.getByText('Товар добавлен в корзину');
     this.errorMessageCatalog = page.getByText('Загрузка продукта...');
-  }
-
-  async goto() {
-    await this.page.goto('/');
   }
 
   async expectSuccess() {
