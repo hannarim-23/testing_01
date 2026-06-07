@@ -30,7 +30,7 @@ export class ProfilePage {
     this.errorMessage = page.getByText(
       'phoneNumber must be a valid phone number,phoneNumber must be in international format (starting with +)'
     );
-    this.errorEmail = page.getByText('Email "user1@mail.ru" already exists.');
+    this.errorEmail = page.getByText('Email "user1@test.com" already exists.');
 
     this.buttonProfile = page.locator('[aria-haspopup="menu"]');
   }

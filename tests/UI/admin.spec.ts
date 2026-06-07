@@ -10,7 +10,14 @@ import { ProfilePage } from '../../pages/UI/ProfilePage';
 const ADMIN_EMAIL = process.env.ADMIN_USER || 'admin@test.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 const EXISTING_PRODUCT = 'Denim Jacket';
-const EXISTING_WAREHOUSE = 'склад 123';
+const test_product = 'iPad Pro 11';
+const testProduct = {
+  name: `Тестовый товар ${Date.now()}`,
+  price: `999`,
+  category: 'Книги',
+  urlImage: '',
+  description: 'some info',
+};
 
 test.describe('Admin Panel Tests', () => {
   let adminPage: AdminPage;
@@ -51,14 +58,6 @@ test.describe('Admin Panel Tests', () => {
   });
 
   test.describe('Products Management', () => {
-    const testProduct = {
-      name: `Тестовый товар ${Date.now()}`,
-      price: `999`,
-      category: 'Книги',
-      urlImage: '',
-      description: 'some info',
-    };
-
     test.beforeEach(async ({ page }) => {
       loginPage = new LoginPage(page);
       await loginPage.goto();
@@ -160,14 +159,28 @@ test.describe('Admin Panel Tests', () => {
     });
 
     test('ADM-12: Редактирование склада @regression', async () => {
-      const newAddress = `New Address ${Date.now()}`;
-      console.log('1111newAddress:', newAddress);
-      await adminPage.editWarehouse(EXISTING_WAREHOUSE, newAddress);
-      const addressAfterEdit = await adminPage.getWarehouseAddress(
-        EXISTING_WAREHOUSE
-      );
+      // 1. Создаём уникальный склад
+      const timestamp = Date.now();
+      const warehouseName = `Тестовый склад ${timestamp}`;
+      const oldAddress = `Старый адрес ${timestamp}`;
 
+      await adminPage.createWarehouse(warehouseName, oldAddress);
+      await adminPage.expectWarehouseInTable(warehouseName);
+
+      // 2. Редактируем адрес
+      const newAddress = `New Address ${timestamp}`;
+      console.log('newAddress:', newAddress);
+
+      await adminPage.editWarehouse(warehouseName, newAddress);
+
+      // 3. Проверяем, что адрес обновился
+      const addressAfterEdit = await adminPage.getWarehouseAddress(
+        warehouseName
+      );
       expect(addressAfterEdit).toContain(newAddress);
+
+      // 4. Очистка (опционально, если есть DELETE эндпоинт)
+      //await adminPage.deleteWarehouse(warehouseName);
     });
   });
 
@@ -182,7 +195,6 @@ test.describe('Admin Panel Tests', () => {
       await adminPage.goToDashboard();
       await adminPage.expectAdminPageLoaded();
       await adminPage.goToOrders();
-
     });
 
     test('ADM-14: Просмотр списка заказов @smoke', async () => {
@@ -214,7 +226,7 @@ test.describe('Admin Panel Tests', () => {
     // Добавление товара в корзину
     const catalogPage = new CatalogPage(page);
     await catalogPage.goto();
-    await catalogPage.addProductToCart('iPad Pro 11');
+    await catalogPage.addProductToCart(test_product);
 
     // Оформление заказа
     const cartPage = new CartPage(page);
@@ -248,9 +260,9 @@ test.describe('Admin Panel Tests', () => {
     await adminPage.goToOrders();
 
     // Находим созданный заказ и меняем статус
-    await page.waitForLoadState('networkidle');//
+    await page.waitForLoadState('networkidle'); //
     const pageText = await page.textContent('body');
-console.log('Текст страницы:', pageText?.substring(0, 500) || '');
+    console.log('Текст страницы:', pageText?.substring(0, 500) || '');
 
     const orderRow = page.locator(`tr:has-text("#${orderId}")`);
     console.log(`Ищем заказ с ID: ${orderId}`);

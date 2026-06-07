@@ -59,9 +59,7 @@ test.describe('Register Tests', () => {
     });
     await registerPage.expectErrorOnPage();
     // BUG-01: Неинформативное сообщение
-    await expect(
-      registerPage.page.locator('.text-destructive:has-text("пароль")')
-    ).toBeVisible();
+    await expect(registerPage.template).toBeVisible();
     await expect(
       registerPage.page.getByText('Пароль должен содержать минимум 8 символов')
     ).not.toBeVisible(); //баг - проверить после исправления (удалить .not)

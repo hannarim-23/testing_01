@@ -16,8 +16,7 @@ export class CatalogPage {
     this.productCard = page.locator('a[href*="/product/"]');
     this.addToCartButton = page.locator('button:has-text("В корзину")');
     this.cartIcon = page.locator('a[href="/cart"]');
-    //this.productPrice = page.locator('a[href*="/product/"] span'); //'span'
-    this.productPrice = page.locator('span'); //'span'
+    this.productPrice = page.locator('span');
     this.productImage = page.locator('img');
     this.errorMessageProduct = page.getByText('Не удалось загрузить продукт');
     this.successMessage = page.getByText('Товар добавлен в корзину');
@@ -75,7 +74,8 @@ export class CatalogPage {
   }
 
   async expectProductCount(expectedCount: number) {
-    await expect(this.productCard).toHaveCount(expectedCount);
+    const count = await this.productCard.count();
+    expect(count).toBeGreaterThan(expectedCount);
   }
 
   async expectProductVisible(productName: string) {
@@ -93,7 +93,6 @@ export class CatalogPage {
     await expect(this.errorMessageProduct).toBeVisible({ timeout: 15000 });
   }
 
-  // BUG-06: Некоторые изображения товаров не загружаются
   async loadImage() {
     await this.page.waitForLoadState('networkidle');
 

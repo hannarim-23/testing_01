@@ -7,8 +7,10 @@ const EMAIL = process.env.TEST_USER_EMAIL;
 const PASSWORD = process.env.TEST_USER_PASSWORD;
 
 const PRODUCT_NAME = 'iPad Pro 11';
-const PRODUCT_HREF1 = '/product/51'; // iPhone 15 Pro
-const PRODUCT_HREF2 = '/product/59'; // Apple Watch S9
+const PRODUCT_HREF1 = '/product/1'; // iPhone 15 Pro
+const PRODUCT_HREF2 = '/product/9'; // Apple Watch S9
+const product_price = 999.99;
+const product_price2 = 399;
 
 if (!EMAIL || !PASSWORD) {
   throw new Error('❌ Missing environment variables. Check .env file');
@@ -58,8 +60,7 @@ test.describe('Cart Tests', () => {
     await cartPage.goToCart();
     await cartPage.expectProductInCart(PRODUCT_NAME);
 
-    const productPrice = 999.99;
-    const expectedTotalPrice = (productPrice * 2).toFixed(2);
+    const expectedTotalPrice = (product_price * 2).toFixed(2);
     const totalPrice = await cartPage.getTotalPrice();
     expect(totalPrice).not.toContain(expectedTotalPrice); //после исправления бага, удалить (.not)
   });
@@ -81,7 +82,7 @@ test.describe('Cart Tests', () => {
       totalText?.replace(/[^\d.,]/g, '').replace(',', '.') || '0'
     );
 
-    const expectedTotal = 999.99 + 399;
+    const expectedTotal = product_price + product_price2;
     const roundedActual = Math.round(cartTotal * 100) / 100;
     const roundedExpected = Math.round(expectedTotal * 100) / 100;
 

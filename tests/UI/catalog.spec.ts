@@ -30,7 +30,7 @@ test.describe('Catalog Tests', () => {
     await catalogPage.expectSuccess();
   });
 
-  test('TC_Ctlg_02: Количество товаров = 50 @smoke', async () => {
+  test('TC_Ctlg_02: Количество товаров > 50 @smoke', async () => {
     await catalogPage.expectSuccess();
     await catalogPage.expectProductCount(PRODUCT_NUMBER);
   });

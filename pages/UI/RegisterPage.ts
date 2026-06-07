@@ -20,6 +20,7 @@ export class RegisterPage {
   readonly passwordError: Locator;
   readonly emailFormatError: Locator;
   readonly phoneFormatError: Locator;
+  readonly template: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -39,6 +40,8 @@ export class RegisterPage {
     this.usernameError = page.getByText('Username обязателен');
     this.phoneError = page.getByText('Телефон обязателен');
     this.passwordError = page.getByText('Пароль обязателен');
+
+    this.template = page.locator('.text-destructive:has-text("пароль")');
 
     this.emailFormatError = page.getByText('email must be an email');
     this.phoneFormatError = page.getByText(

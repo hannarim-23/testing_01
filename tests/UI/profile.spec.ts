@@ -1,8 +1,9 @@
 import { RegisterPage } from './../../pages/UI/RegisterPage';
 import { test, expect } from '@playwright/test';
-import {ProfilePage} from '../../pages/UI/ProfilePage';
+import { ProfilePage } from '../../pages/UI/ProfilePage';
 import { LoginPage } from '../../pages/UI/LoginPage';
 import { getTestUser } from '../../helpers/testData';
+import { getNewPhone } from '../../helpers/generatTelephone';
 
 const EMAIL = process.env.TEST_USER_EMAIL;
 const PASSWORD = process.env.TEST_USER_PASSWORD;
@@ -54,7 +55,7 @@ test.describe('Profile Tests', () => {
     });
 
     test('PROFILE-03: Редактирование телефона (позитивный) @regression', async () => {
-      const newPhone = `+37529${Date.now()}`.slice(0, 13);
+      const newPhone = getNewPhone();
 
       await profilePage.changePhone(newPhone);
       await profilePage.clickSave();
