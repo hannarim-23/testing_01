@@ -11,11 +11,13 @@ const ADMIN_EMAIL = process.env.ADMIN_USER || 'admin@test.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 const EXISTING_PRODUCT = 'Denim Jacket';
 const test_product = 'iPad Pro 11';
+
 const testProduct = {
   name: `Тестовый товар ${Date.now()}`,
   price: `999`,
   category: 'Книги',
-  urlImage: 'https://images.unsplash.com/photo-1625773143851-4f16a04e8d35?q=80&w=500',
+  urlImage:
+    'https://images.unsplash.com/photo-1625773143851-4f16a04e8d35?q=80&w=500',
   description: 'some info',
 };
 
@@ -199,107 +201,114 @@ test.describe('Admin Panel Tests', () => {
     });
   });
 
-  test('ADM-15: Изменение статуса заказа @regression', async ({ page }) => {
+  test.describe.serial('ADM-15: Изменение статуса заказа', () => {
+    let orderId;
     const userEmail = `test_${Date.now()}@mail.ru`;
     const userPassword = '12345678';
 
-    const registerPage = new RegisterPage(page);
-    await registerPage.goto();
-    await registerPage.register({
-      firstname: 'Тест',
-      lastname: 'Тестов',
-      email: userEmail,
-      username: `user_${Date.now()}`,
-      phone: `+37529${Date.now()}`.slice(0, 13),
-      password: userPassword,
+    test('1. Создание заказа', async ({ page }) => {
+      const registerPage = new RegisterPage(page);
+      await registerPage.goto();
+      await registerPage.register({
+        firstname: 'Тест',
+        lastname: 'Тестов',
+        email: userEmail,
+        username: `user_${Date.now()}`,
+        phone: `+37529${Date.now()}`.slice(0, 13),
+        password: userPassword,
+      });
+      await registerPage.expectSuccess();
+
+      // Вход пользователя
+      const loginPage = new LoginPage(page);
+      await loginPage.login(userEmail, userPassword);
+      await loginPage.expectSuccess();
+
+      // Добавление товара в корзину
+      const catalogPage = new CatalogPage(page);
+      await catalogPage.goto();
+      await catalogPage.addProductToCart(test_product);
+
+      // Оформление заказа
+      const cartPage = new CartPage(page);
+      await cartPage.goToCart();
+      await cartPage.checkout();
+      await cartPage.expectOrderSuccess();
+
+      // Получаем номер заказа (сохраняем для проверки)
+      await page.goto('/orders');
+      const orderNumberElement = page
+        .locator('button:has-text("Заказ #")')
+        .first();
+      const orderNumberText = await orderNumberElement.textContent();
+      orderId = orderNumberText?.slice(7, 10); //orderNumberText?.match(/\d+/)?.[0];
+      //  const orderId = orderNumberText?.slice(7, 10); //orderNumberText?.match(/\d+/)?.[0];
+      console.log(` Создан заказ #${orderId} для пользователя ${userEmail}`);
+      const profilePage = new ProfilePage(page);
+      await profilePage.buttonProfile.click();
+      await profilePage.logout();
+      await profilePage.expectNotLoggedIn();
     });
-    await registerPage.expectSuccess();
 
-    // Вход пользователя
-    const loginPage = new LoginPage(page);
-    await loginPage.login(userEmail, userPassword);
-    await loginPage.expectSuccess();
+    test('2. Админ меняет статус', async ({ page }) => {
+      // Вход как администратор
+      const adminLoginPage = new LoginPage(page);
+      await adminLoginPage.goto();
+      await adminLoginPage.login(ADMIN_EMAIL, ADMIN_PASSWORD);
+      await adminLoginPage.expectSuccess();
 
-    // Добавление товара в корзину
-    const catalogPage = new CatalogPage(page);
-    await catalogPage.goto();
-    await catalogPage.addProductToCart(test_product);
+      // Переход в админ-панель
+      const adminPage = new AdminPage(page);
+      await adminPage.goToDashboard();
+      await adminPage.goToOrders();
 
-    // Оформление заказа
-    const cartPage = new CartPage(page);
-    await cartPage.goToCart();
-    await cartPage.checkout();
-    await cartPage.expectOrderSuccess();
+      // Находим созданный заказ и меняем статус
+      await page.waitForLoadState('networkidle'); //
+      const pageText = await page.textContent('body');
+      console.log('Текст страницы:', pageText?.substring(0, 500) || '');
 
-    // Получаем номер заказа (сохраняем для проверки)
-    await page.goto('/orders');
-    const orderNumberElement = page
-      .locator('button:has-text("Заказ #")')
-      .first();
-    const orderNumberText = await orderNumberElement.textContent();
-    const orderId = orderNumberText?.slice(7, 10); //orderNumberText?.match(/\d+/)?.[0];
-    console.log(` Создан заказ #${orderId} для пользователя ${userEmail}`);
+      const orderRow = page.locator(`tr:has-text("#${orderId}")`);
+      console.log(`Ищем заказ с ID: ${orderId}`);
 
-    console.log('2. Вход в админ-панель и изменение статуса');
-    const profilePage = new ProfilePage(page);
-    await profilePage.buttonProfile.click();
-    await profilePage.logout();
-    await profilePage.expectNotLoggedIn();
+      await expect(orderRow).toBeVisible({ timeout: 30000 });
 
-    // Вход как администратор
-    const adminLoginPage = new LoginPage(page);
-    await adminLoginPage.login(ADMIN_EMAIL, ADMIN_PASSWORD);
-    await adminLoginPage.expectSuccess();
+      // Проверяем текущий статус (должен быть PENDING)
+      const statusCell = orderRow.locator('td').nth(3);
+      await expect(statusCell).toHaveText('PENDING');
+      console.log(` Заказ #${orderId} имеет статус PENDING`);
 
-    // Переход в админ-панель
-    const adminPage = new AdminPage(page);
-    await adminPage.goToDashboard();
-    await adminPage.goToOrders();
+      const statusTrigger = orderRow
+        .locator('[role="combobox"], .status-select, [data-state="closed"]')
+        .first();
+      await statusTrigger.click();
 
-    // Находим созданный заказ и меняем статус
-    await page.waitForLoadState('networkidle'); //
-    const pageText = await page.textContent('body');
-    console.log('Текст страницы:', pageText?.substring(0, 500) || '');
+      // Выбираем нужный статус из выпадающего списка
+      const option = page
+        .locator(`[role="option"]:has-text("DELIVERED")`)
+        .first();
+      await option.click();
 
-    const orderRow = page.locator(`tr:has-text("#${orderId}")`);
-    console.log(`Ищем заказ с ID: ${orderId}`);
+      await expect(statusCell).toHaveText('DELIVERED');
+      console.log(`✅ Заказ #${orderId} изменён на DELIVERED`);
+      console.log('👤 3. Проверяем статус заказа от имени клиента');
+      // Выход из админа
+      await adminPage.logout();
+    });
 
-    await expect(orderRow).toBeVisible({ timeout: 30000 });
+    test('3. Пользователь проверяет статус', async ({ page }) => {
+      // Вход пользователя
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
+      await loginPage.login(userEmail, userPassword);
+      await loginPage.expectSuccess();
 
-    // Проверяем текущий статус (должен быть PENDING)
-    const statusCell = orderRow.locator('td').nth(3);
-    await expect(statusCell).toHaveText('PENDING');
-    console.log(` Заказ #${orderId} имеет статус PENDING`);
+      // Переход в заказы
+      await page.goto('/orders');
 
-    const statusTrigger = orderRow
-      .locator('[role="combobox"], .status-select, [data-state="closed"]')
-      .first();
-    await statusTrigger.click();
-
-    // Выбираем нужный статус из выпадающего списка
-    const option = page
-      .locator(`[role="option"]:has-text("DELIVERED")`)
-      .first();
-    await option.click();
-
-    await expect(statusCell).toHaveText('DELIVERED');
-    console.log(`✅ Заказ #${orderId} изменён на DELIVERED`);
-
-    console.log('👤 3. Проверяем статус заказа от имени клиента');
-    // Выход из админа
-    await adminPage.logout();
-
-    // Вход пользователя
-    await loginPage.login(userEmail, userPassword);
-    await loginPage.expectSuccess();
-
-    // Переход в заказы
-    await page.goto('/orders');
-
-    // Проверяем статус заказа
-    const userOrderRow = page.locator(`button:has-text("Заказ #${orderId}")`);
-    await expect(userOrderRow).toBeVisible();
-
-    await expect(userOrderRow).toContainText('DELIVERED', { timeout: 5000 });
+      // Проверяем статус заказа
+      const userOrderRow = page.locator(`button:has-text("Заказ #${orderId}")`);
+      await expect(userOrderRow).toBeVisible();
+      await expect(userOrderRow).toContainText('DELIVERED', { timeout: 5000 });
+    });
   });
 });

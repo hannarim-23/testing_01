@@ -91,11 +91,6 @@ export class ProfilePage extends BasePage {
     await expect(this.errorMessage).toBeVisible();
   }
 
-  async logout() {
-    await expect(this.logoutButton).toBeVisible();
-    await this.logoutButton.click();
-  }
-
   async expectNotLoggedIn() {
     await expect(this.page).toHaveURL('/login');
     await this.page.goto('/profile');

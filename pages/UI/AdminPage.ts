@@ -213,22 +213,11 @@ export class AdminPage extends BasePage {
     await this.editProductButton(productName).click();
     await this.page.waitForLoadState('networkidle');
 
-    if (updates.name) {
-      await this.productNameInput.clear();
-      await this.productNameInput.fill(updates.name);
-    }
-    if (updates.description) {
-      await this.productDescriptionInput.clear();
-      await this.productDescriptionInput.fill(updates.description);
-    }
-    if (updates.price) {
-      await this.productPriceInput.clear();
-      await this.productPriceInput.fill(updates.price);
-    }
-    if (updates.urlImage) {
-      await this.productImageInput.clear();
-      await this.productImageInput.fill(updates.urlImage);
-    }
+    await this.clearAndFill(this.productNameInput, updates.name);
+    await this.clearAndFill(this.productDescriptionInput, updates.description);
+    await this.clearAndFill(this.productPriceInput, updates.price);
+    await this.clearAndFill(this.productImageInput, updates.urlImage);
+
     if (updates.category) {
       await this.productCategory.click();
       const option = this.page
@@ -332,6 +321,5 @@ export class AdminPage extends BasePage {
     async getOrderStatus(orderId: string): Promise<string> {
         return await this.orderStatusSelect(orderId).inputValue();
     }
-
     */
 }
