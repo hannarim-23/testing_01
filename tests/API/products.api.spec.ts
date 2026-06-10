@@ -1,20 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { testProducts } from '../../fixtures/testProductsData';
+import { newProduct } from '../../helpers/newProduct';
 
 const API_URL = process.env.API_URL;
 const invalid = 9999999;
-
-const newProduct = () => {
-  const timestamp = Date.now();
-  return {
-    name: `Product_${timestamp}`,
-    description: 'some info',
-    price: 555,
-    category: 'ELECTRONICS',
-    urlImage:
-      'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=500',
-  };
-};
 
 test.describe('API: PRODUCT', () => {
   const createdProductIds: number[] = [];

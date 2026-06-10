@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { newUser } from '../../helpers/newUser';
+import {existingUser} from '../../fixtures/existingUser'
 
 const API_URL = process.env.API_URL;
 const ADMIN_USER = process.env.ADMIN_USER;
@@ -31,40 +32,21 @@ test.describe('API: Auth', () => {
     expect(response.status()).toBe(201);
 
     const responseBody = await response.json();
+    createdUserIds.push(responseBody.id); // запоминаем для удаления
 
     expect(responseBody).toHaveProperty('id');
     expect(responseBody).toHaveProperty('email');
-    expect(responseBody).toHaveProperty('firstname');
-    expect(responseBody).toHaveProperty('lastname');
-    expect(responseBody).toHaveProperty('username');
-    expect(responseBody).toHaveProperty('role');
-
     expect(responseBody.email).toBe(userData.email);
     expect(responseBody.firstname).toBe(userData.firstname);
     expect(responseBody.username).toBe(userData.username);
     expect(responseBody.role).toBe(userData.role);
-
     expect(typeof responseBody.id).toBe('number');
     expect(responseBody.id).toBeGreaterThan(0);
-
-    const createdUser = await response.json();
-    createdUserIds.push(createdUser.id); // запоминаем для удаления
   });
 
   test('API-01_2: POST /auth/register — ошибочная регистрация (существующий email)', async ({
     request,
   }) => {
-    // Данные пользователя, который уже существует
-    const existingUser = {
-      firstname: 'Ivan',
-      lastname: 'Ivanov',
-      phoneNumber: '+1234567890',
-      email: 'user1@test.com', // уже существует
-      username: 'ivan_ivanov_unique',
-      password: 'password123',
-      role: 'USER',
-    };
-
     const response = await request.post(`${API_URL}/auth/register`, {
       data: existingUser,
     });

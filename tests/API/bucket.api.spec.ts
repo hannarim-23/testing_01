@@ -37,6 +37,9 @@ test.describe('API: BUCKET', () => {
     const response = await request.get(`${API_URL}/bucket/${invalidUser}`, {});
 
     expect(response.status()).toBe(404);
+
+    const responseBody = await response.json();
+    expect(responseBody.message).toContain(`Bucket not found for user with ID ${invalidUser}`);
   });
 
   test('API-02_1: POST /bucket/{userId}/addProduct — добавить товар в корзину юзера', async ({
