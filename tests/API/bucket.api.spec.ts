@@ -4,9 +4,10 @@ import { clearBucket } from '../../helpers/cleanup';
 const API_URL = process.env.API_URL;
 const invalidUser = 0;
 const userId = 1; // корзина админа
-const invalid = 999999; 
+const invalid = 999999;
 const productId = 5;
 const productIds = [10, 11, 12];
+const userIdFortestBucket = 12; //корзина не пуста
 
 test.describe('API: BUCKET', () => {
   test.afterEach(async ({ request }) => {
@@ -16,19 +17,20 @@ test.describe('API: BUCKET', () => {
   test('API-01_1: GET /bucket/{userId} — получить корзину юзера', async ({
     request,
   }) => {
-    const response = await request.get(`${API_URL}/bucket/${userId}`, {});
+    const response = await request.get(
+      `${API_URL}/bucket/${userIdFortestBucket}`,
+      {}
+    );
 
     expect(response.status()).toBe(200);
     const responseBody = await response.json();
 
     expect(responseBody).toHaveProperty('id');
+    console.log(responseBody);
     expect(responseBody).toHaveProperty('products');
-
-    if (responseBody.products.length > 0) {
-      expect(responseBody.products[0]).toHaveProperty('product_id');
-      expect(responseBody.products[0]).toHaveProperty('bucket_id');
-      expect(responseBody.products[0]).toHaveProperty('product');
-    }
+    expect(responseBody.products[0]).toHaveProperty('product_id');
+    expect(responseBody.products[0]).toHaveProperty('bucket_id');
+    expect(responseBody.products[0]).toHaveProperty('product');
   });
 
   test('API-01_2: GET /bucket/{userId} — получить корзину юзера(негативный)', async ({
@@ -39,7 +41,9 @@ test.describe('API: BUCKET', () => {
     expect(response.status()).toBe(404);
 
     const responseBody = await response.json();
-    expect(responseBody.message).toContain(`Bucket not found for user with ID ${invalidUser}`);
+    expect(responseBody.message).toContain(
+      `Bucket not found for user with ID ${invalidUser}`
+    );
   });
 
   test('API-02_1: POST /bucket/{userId}/addProduct — добавить товар в корзину юзера', async ({
