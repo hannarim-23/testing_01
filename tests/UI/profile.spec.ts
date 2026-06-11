@@ -2,8 +2,8 @@ import { RegisterPage } from './../../pages/UI/RegisterPage';
 import { test, expect } from '@playwright/test';
 import { ProfilePage } from '../../pages/UI/ProfilePage';
 import { LoginPage } from '../../pages/UI/LoginPage';
-import { getTestUser } from '../../helpers/testData';
 import { getNewPhone } from '../../helpers/generatTelephone';
+import {newUser} from '../../helpers/newUser';
 
 const EMAIL = process.env.TEST_USER_EMAIL;
 const PASSWORD = process.env.TEST_USER_PASSWORD;
@@ -29,7 +29,7 @@ test.describe('Profile Tests', () => {
 
     test('PROFILE-01: Просмотр данных профиля @smoke', async () => {
       const firstName = await profilePage.getFirstName();
-      const phone = await profilePage.getPhone();
+      const phoneNumber = await profilePage.getPhone();
       const lastName = await profilePage.getPhone();
       const username = await profilePage.getPhone();
       const email = await profilePage.getPhone();
@@ -39,7 +39,7 @@ test.describe('Profile Tests', () => {
       expect(email).not.toBe('');
       expect(lastName).not.toBe('');
       expect(firstName).not.toBe('');
-      expect(phone).not.toBe('');
+      expect(phoneNumber).not.toBe('');
     });
 
     test('PROFILE-02: Редактирование имени @smoke', async () => {
@@ -87,7 +87,7 @@ test.describe('Profile Tests', () => {
     test('PROFILE-05: Редактирование email на уже существующий @regression', async ({
       page,
     }) => {
-      const secondUser = getTestUser();
+      const secondUser = newUser();
 
       const registerPage = new RegisterPage(page);
       await registerPage.goto();

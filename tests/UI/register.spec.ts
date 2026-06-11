@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { getTestUser } from '../../helpers/testData';
 import { RegisterPage } from '../../pages/UI/RegisterPage';
+import {newUser} from '../../helpers/newUser';
 
 //const BASE_URL = process.env.BASE_URL;
 const EMAIL = process.env.TEST_USER_EMAIL;
@@ -20,13 +20,13 @@ test.describe('Register Tests', () => {
   });
 
   test('TC_REG_01: Успешная регистрация @smoke @regression', async () => {
-    const user = getTestUser();
+    const user = newUser();
     await registerPage.register(user);
     await registerPage.expectSuccess();
   });
 
   test('TC_REG_02: Регистрация с существующим email @regression', async () => {
-    const user = getTestUser();
+    const user = newUser();
     await registerPage.register({
       ...user,
       email: EMAIL,
@@ -38,7 +38,7 @@ test.describe('Register Tests', () => {
   });
 
   test('TC_REG_03: Невалидный email @regression', async () => {
-    const user = getTestUser();
+    const user = newUser();
     await registerPage.register({
       ...user,
       email: '123mail.ru',
@@ -52,7 +52,7 @@ test.describe('Register Tests', () => {
   // Фактически: красное слово "пароль"
   // TODO: раскомментировать проверку нормального сообщения после исправления
   test('TC_REG_04: Короткий пароль (< 8 символов) @regression', async () => {
-    const user = getTestUser();
+    const user = newUser();
     await registerPage.register({
       ...user,
       password: '123',
@@ -71,18 +71,19 @@ test.describe('Register Tests', () => {
       lastname: '',
       email: '',
       username: '',
-      phone: '',
+      phoneNumber: '',
       password: '',
+      role:'',
     });
     await registerPage.expectErrorOnPage();
     await registerPage.expectFieldErrors();
   });
 
   test('TC_REG_06: Невалидный телефон @regression', async () => {
-    const user = getTestUser();
+    const user = newUser();
     await registerPage.register({
       ...user,
-      phone: 'abc',
+      phoneNumber: 'abc',
     });
     await registerPage.expectErrorOnPage();
     await registerPage.expectPhoneFormatError();
@@ -93,12 +94,12 @@ test.describe('Register Tests', () => {
   // Фактически: регистрация проходит успешно
   // TODO: удалить (.skip) после исправления
   test.skip('TC_REG_07: Телефон уже существует @regression', async () => {
-    const user = getTestUser();
-    await registerPage.register({ ...user, phone: EXISTING_PHONE });
+    const user = newUser();
+    await registerPage.register({ ...user, phoneNumber: EXISTING_PHONE });
     await registerPage.expectErrorOnPage();
     await expect(
       registerPage.page.getByText(
-        `Telephone number "${user.phone}" already exists.`
+        `Telephone number "${user.phoneNumber}" already exists.`
       )
     ).toBeVisible();
   });
@@ -108,7 +109,7 @@ test.describe('Register Tests', () => {
   // Фактически: поле email содержит username
   // TODO: после исправления заменить проверку на expect(emailValue).toBe('')
   test('TC_REG_08: Проверка поля email после регистрации @regression', async () => {
-    const user = getTestUser();
+    const user = newUser();
     await registerPage.register(user);
     await registerPage.expectRedirectToLogin();
 

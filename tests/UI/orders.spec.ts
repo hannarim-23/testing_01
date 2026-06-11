@@ -2,8 +2,8 @@ import { test, expect } from '@playwright/test';
 import { OrdersPage } from '../../pages/UI/OrdersPage';
 import { LoginPage } from '../../pages/UI/LoginPage';
 import { CartPage } from '../../pages/UI/CartPage';
-import { getTestUser } from '../../helpers/testData';
 import { RegisterPage } from '../../pages/UI/RegisterPage';
+import {newUser} from '../../helpers/newUser';
 
 const EMAIL = process.env.TEST_USER_EMAIL;
 const PASSWORD = process.env.TEST_USER_PASSWORD;
@@ -60,15 +60,15 @@ test.describe('Orders Tests', () => {
   test.describe('New user without orders', () => {
     test('ORD-02: Пустой список заказов @regression', async ({ page }) => {
       //регистрация
-      const newUser = getTestUser();
+      const new_User = newUser();
       const registerPage = new RegisterPage(page);
       await registerPage.goto();
-      await registerPage.register(newUser);
+      await registerPage.register(new_User);
       await registerPage.expectSuccess();
 
       // Вход
       const loginPage = new LoginPage(page);
-      await loginPage.login(newUser.email, newUser.password);
+      await loginPage.login(new_User.email, new_User.password);
       await loginPage.expectSuccess();
 
       ordersPage = new OrdersPage(page);

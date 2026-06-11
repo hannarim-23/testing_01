@@ -36,9 +36,11 @@ export class AdminPage extends BasePage {
   readonly warehouseBtnSave: Locator;
   readonly warehouseBtnReject: Locator;
 
+
   // Заказы
   readonly orderTable: Locator;
   readonly orderStatusSelect: (orderId: string) => Locator;
+//  readonly orderRow: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -91,6 +93,7 @@ export class AdminPage extends BasePage {
     this.orderTable = page.locator('table');
     this.orderStatusSelect = (orderId: string) =>
       page.locator(`tr:has-text("${orderId}") select`);
+    //this.orderRow.locator('[role="combobox"]').first();
   }
 
   // ========== Авторизация админа ==========

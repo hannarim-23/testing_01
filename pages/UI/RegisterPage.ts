@@ -57,14 +57,15 @@ export class RegisterPage extends BasePage {
     lastname: string;
     email: string;
     username: string;
-    phone: string;
+    phoneNumber: string;
     password: string;
+    role:string;
   }) {
     await this.firstnameInput.fill(user.firstname);
     await this.lastnameInput.fill(user.lastname);
     await this.emailInput.fill(user.email);
     await this.usernameInput.fill(user.username);
-    await this.phoneInput.fill(user.phone);
+    await this.phoneInput.fill(user.phoneNumber);
     await this.passwordInput.fill(user.password);
     await this.submitButton.click();
   }

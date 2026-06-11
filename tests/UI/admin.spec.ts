@@ -1,16 +1,18 @@
 import { test, expect } from '@playwright/test';
 import { AdminPage } from '../../pages/UI/AdminPage';
 import { LoginPage } from '../../pages/UI/LoginPage';
-
+/*
 import { RegisterPage } from '../../pages/UI/RegisterPage';
 import { CatalogPage } from '../../pages/UI/CatalogPage';
 import { CartPage } from '../../pages/UI/CartPage';
 import { ProfilePage } from '../../pages/UI/ProfilePage';
-
+*/
 const ADMIN_EMAIL = process.env.ADMIN_USER || 'admin@test.com';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
 const EXISTING_PRODUCT = 'Denim Jacket';
-const test_product = 'iPad Pro 11';
+//const test_product = 'iPad Pro 11';
+const API_URL = process.env.API_URL;
+const test_productID = 5;
 
 const testProduct = {
   name: `Тестовый товар ${Date.now()}`,
@@ -203,6 +205,103 @@ test.describe('Admin Panel Tests', () => {
 
   test.describe.serial('ADM-15: Изменение статуса заказа', () => {
     let orderId;
+    let userEmail;
+    let userPassword;
+
+    test('1. Создание заказа через API', async ({ request }) => {
+      userEmail = `test_${Date.now()}@mail.ru`;
+      userPassword = '12345678';
+
+      // ========== 1. РЕГИСТРАЦИЯ ЧЕРЕЗ API ==========
+      const registerResponse = await request.post(`${API_URL}/auth/register`, {
+        data: {
+          firstname: 'Тест',
+          lastname: 'Тестов',
+          email: userEmail,
+          username: `user_${Date.now()}`,
+          phoneNumber: `+37529${Date.now()}`.slice(0, 13),
+          password: userPassword,
+          role: 'USER',
+        },
+      });
+      expect(registerResponse.status()).toBe(201);
+
+      // ========== 2. ЛОГИН ЧЕРЕЗ API ==========
+      const loginResponse = await request.post(`${API_URL}/auth/login`, {
+        data: { email: userEmail, password: userPassword },
+      });
+      expect(loginResponse.status()).toBe(201);
+      const responseBody = await loginResponse.json();
+      const userId = responseBody.id;
+
+      // ========== 3. ДОБАВЛЕНИЕ ТОВАРА В КОРЗИНУ ЧЕРЕЗ API ==========
+      const addToCartResponse = await request.post(
+        `${API_URL}/bucket/${userId}/addProduct`,
+        {
+          data: { productId: test_productID },
+        }
+      );
+      expect(addToCartResponse.status()).toBe(201);
+
+      // ========== 4. СОЗДАНИЕ ЗАКАЗА ЧЕРЕЗ API ==========
+      const orderResponse = await request.post(`${API_URL}/order/${userId}`, {
+        data: {
+          items: [{ product_id: test_productID, quantity: 1 }],
+        },
+      });
+      expect(orderResponse.status()).toBe(201);
+      const orderData = await orderResponse.json();
+      orderId = orderData.orderId;
+      console.log(`✅ Создан заказ #${orderId} для пользователя ${userEmail}`);
+    });
+
+    test('2. Админ меняет статус через UI', async ({ page }) => {
+      // Вход администратора
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
+      await loginPage.login(ADMIN_EMAIL, ADMIN_PASSWORD);
+      await loginPage.expectSuccess();
+
+      const adminPage = new AdminPage(page);
+      await adminPage.goToDashboard();
+      await adminPage.goToOrders();
+
+      const orderRow = page.locator(`tr:has-text("#${orderId}")`);
+      await expect(orderRow).toBeVisible({ timeout: 10000 });
+
+      const statusCell = orderRow.locator('td').nth(3);
+      await expect(statusCell).toHaveText('PENDING');
+
+      const statusTrigger = orderRow.locator('[role="combobox"]').first();
+      await statusTrigger.click();
+
+      const option = page
+        .locator(`[role="option"]:has-text("DELIVERED")`)
+        .first();
+      await option.click();
+
+      await expect(statusCell).toHaveText
+      await adminPage.logout();
+    });
+
+    test('3. Пользователь проверяет статус через UI', async ({ page }) => {
+      const loginPage = new LoginPage(page);
+      await loginPage.goto();
+      await loginPage.login(userEmail, userPassword);
+      await loginPage.expectSuccess();
+
+      await page.goto('/orders');
+      await page.waitForLoadState('networkidle');
+
+      const userOrderRow = page.locator(`button:has-text("Заказ #${orderId}")`);
+      await expect(userOrderRow).toBeVisible();
+      await expect(userOrderRow).toContainText('DELIVERED', { timeout: 5000 });
+    });
+  });
+
+  /*
+  test.describe.serial('ADM-15: Изменение статуса заказа', () => {
+    let orderId;
     const userEmail = `test_${Date.now()}@mail.ru`;
     const userPassword = '12345678';
 
@@ -214,8 +313,9 @@ test.describe('Admin Panel Tests', () => {
         lastname: 'Тестов',
         email: userEmail,
         username: `user_${Date.now()}`,
-        phone: `+37529${Date.now()}`.slice(0, 13),
+        phoneNumber: `+37529${Date.now()}`.slice(0, 13),
         password: userPassword,
+        role:'USER'
       });
       await registerPage.expectSuccess();
 
@@ -310,5 +410,5 @@ test.describe('Admin Panel Tests', () => {
       await expect(userOrderRow).toBeVisible();
       await expect(userOrderRow).toContainText('DELIVERED', { timeout: 5000 });
     });
-  });
+  });*/
 });
