@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 import { ProfilePage } from '../../pages/UI/ProfilePage';
 import { LoginPage } from '../../pages/UI/LoginPage';
 import { getNewPhone } from '../../helpers/generatTelephone';
-import {newUser} from '../../helpers/newUser';
+import { newUser } from '../../helpers/newUser';
 
 const EMAIL = process.env.TEST_USER_EMAIL;
 const PASSWORD = process.env.TEST_USER_PASSWORD;
@@ -84,9 +84,7 @@ test.describe('Profile Tests', () => {
   });
 
   test.describe('Email uniqueness', () => {
-    test('PROFILE-05: Редактирование email на уже существующий @regression', async ({
-      page,
-    }) => {
+    test('PROFILE-05: Редактирование email на уже существующий @regression', async ({ page }) => {
       const secondUser = newUser();
 
       const registerPage = new RegisterPage(page);

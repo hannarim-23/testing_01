@@ -2,25 +2,21 @@ import { test, expect } from '@playwright/test';
 
 const API_URL = process.env.API_URL;
 const userId = 1; // корзина админа
-const invalid = 999999; 
+const invalid = 999999;
 const productId = 5;
 
 test.describe('API: ORDER', () => {
-
   const createdOrderIds: number[] = [];
   test.afterEach(async () => {
-      if (createdOrderIds.length > 0) {
-          console.log(` Создано заказов: ${createdOrderIds.length}`);
-          console.log(` ID заказов: ${createdOrderIds.join(', ')}`);
-          console.log(` ⚠️Очистка не реализована (нет DELETE эндпоинта)`);
-          createdOrderIds.length = 0;
-      }
+    if (createdOrderIds.length > 0) {
+      console.log(` Создано заказов: ${createdOrderIds.length}`);
+      console.log(` ID заказов: ${createdOrderIds.join(', ')}`);
+      console.log(` ⚠️Очистка не реализована (нет DELETE эндпоинта)`);
+      createdOrderIds.length = 0;
+    }
   });
 
-
-  test('API-01_1: GET /order — получить все заказы (в Админ части)', async ({
-    request,
-  }) => {
+  test('API-01_1: GET /order — получить все заказы (в Админ части)', async ({ request }) => {
     const response = await request.get(`${API_URL}/order`);
 
     expect(response.status()).toBe(200);
@@ -37,9 +33,7 @@ test.describe('API: ORDER', () => {
     }
   });
 
-  test('API-02_1: POST /order/{userId} — создать новый заказ для юзера', async ({
-    request,
-  }) => {
+  test('API-02_1: POST /order/{userId} — создать новый заказ для юзера', async ({ request }) => {
     const items = [
       {
         product_id: productId,
@@ -58,7 +52,7 @@ test.describe('API: ORDER', () => {
 
     //очистка после выполнения
     const order = await response.json();
-    createdOrderIds.push(order.orderId);  // запоминаем
+    createdOrderIds.push(order.orderId); // запоминаем
   });
 
   test('API-02_2: POST /order/{userId} — создать новый заказ для юзера(негативный)', async ({
@@ -78,9 +72,7 @@ test.describe('API: ORDER', () => {
     expect(response.status()).toBe(404);
   });
 
-  test('API-03_1: GET /order/{userId} — получить все заказы юзера', async ({
-    request,
-  }) => {
+  test('API-03_1: GET /order/{userId} — получить все заказы юзера', async ({ request }) => {
     const response = await request.get(`${API_URL}/order/${userId}`, {});
 
     expect(response.status()).toBe(200);
@@ -102,9 +94,7 @@ test.describe('API: ORDER', () => {
     expect(errorBody.message).toContain('not found');
   });
 
-  test('API-04_1: PATCH /order/{userId} — изменить статус заказа', async ({
-    request,
-  }) => {
+  test('API-04_1: PATCH /order/{userId} — изменить статус заказа', async ({ request }) => {
     // 1. Создаём заказ
     const createResponse = await request.post(`${API_URL}/order/${userId}`, {
       data: { items: [{ product_id: productId, quantity: 1 }] },
@@ -134,5 +124,4 @@ test.describe('API: ORDER', () => {
     const errorBody = await response.json();
     expect(errorBody.message).toContain('not found');
   });
-
 });

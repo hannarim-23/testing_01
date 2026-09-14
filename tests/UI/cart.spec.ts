@@ -78,9 +78,7 @@ test.describe('Cart Tests', () => {
     await cartPage.goToCart();
 
     const totalText = await cartPage.getTotalPrice();
-    const cartTotal = parseFloat(
-      totalText?.replace(/[^\d.,]/g, '').replace(',', '.') || '0'
-    );
+    const cartTotal = parseFloat(totalText?.replace(/[^\d.,]/g, '').replace(',', '.') || '0');
 
     const expectedTotal = product_price + product_price2;
     const roundedActual = Math.round(cartTotal * 100) / 100;

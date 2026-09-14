@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { AdminPage } from '../../pages/UI/AdminPage';
 import { LoginPage } from '../../pages/UI/LoginPage';
+import * as allure from 'allure-js-commons';
 /*
 import { RegisterPage } from '../../pages/UI/RegisterPage';
 import { CatalogPage } from '../../pages/UI/CatalogPage';
@@ -18,8 +19,7 @@ const testProduct = {
   name: `Тестовый товар ${Date.now()}`,
   price: `999`,
   category: 'Книги',
-  urlImage:
-    'https://images.unsplash.com/photo-1625773143851-4f16a04e8d35?q=80&w=500',
+  urlImage: 'https://images.unsplash.com/photo-1625773143851-4f16a04e8d35?q=80&w=500',
   description: 'some info',
 };
 
@@ -39,6 +39,7 @@ test.describe('Admin Panel Tests', () => {
     });
 
     test('ADM-01: Доступ к админ-панели @smoke', async () => {
+      await allure.tag('smoke');
       await adminPage.expectLoggedIn();
     });
 
@@ -152,10 +153,7 @@ test.describe('Admin Panel Tests', () => {
     });
 
     test('ADM-11: Создание нового склада @regression', async () => {
-      await adminPage.createWarehouse(
-        testWarehouse.name,
-        testWarehouse.address
-      );
+      await adminPage.createWarehouse(testWarehouse.name, testWarehouse.address);
       await adminPage.expectWarehouseInTable(testWarehouse.name);
     });
 
@@ -175,9 +173,7 @@ test.describe('Admin Panel Tests', () => {
       await adminPage.editWarehouse(warehouseName, newAddress);
 
       // 3. Проверяем, что адрес обновился
-      const addressAfterEdit = await adminPage.getWarehouseAddress(
-        warehouseName
-      );
+      const addressAfterEdit = await adminPage.getWarehouseAddress(warehouseName);
       expect(addressAfterEdit).toContain(newAddress);
 
       // 4. Очистка (опционально, если есть DELETE эндпоинт)
@@ -235,12 +231,9 @@ test.describe('Admin Panel Tests', () => {
       const userId = responseBody.id;
 
       // ========== 3. ДОБАВЛЕНИЕ ТОВАРА В КОРЗИНУ ЧЕРЕЗ API ==========
-      const addToCartResponse = await request.post(
-        `${API_URL}/bucket/${userId}/addProduct`,
-        {
-          data: { productId: test_productID },
-        }
-      );
+      const addToCartResponse = await request.post(`${API_URL}/bucket/${userId}/addProduct`, {
+        data: { productId: test_productID },
+      });
       expect(addToCartResponse.status()).toBe(201);
 
       // ========== 4. СОЗДАНИЕ ЗАКАЗА ЧЕРЕЗ API ==========
@@ -275,12 +268,10 @@ test.describe('Admin Panel Tests', () => {
       const statusTrigger = orderRow.locator('[role="combobox"]').first();
       await statusTrigger.click();
 
-      const option = page
-        .locator(`[role="option"]:has-text("DELIVERED")`)
-        .first();
+      const option = page.locator(`[role="option"]:has-text("DELIVERED")`).first();
       await option.click();
 
-      await expect(statusCell).toHaveText
+      await expect(statusCell).toHaveText('DELIVERED');
       await adminPage.logout();
     });
 
