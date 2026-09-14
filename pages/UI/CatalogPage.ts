@@ -28,9 +28,7 @@ export class CatalogPage extends BasePage {
   }
 
   async getProductCardByName(productName: string) {
-    return this.page
-      .locator(`a[href*="/product/"]:has-text("${productName}")`)
-      .first();
+    return this.page.locator(`a[href*="/product/"]:has-text("${productName}")`).first();
   }
 
   async addProductToCart(productName: string) {
@@ -59,13 +57,8 @@ export class CatalogPage extends BasePage {
 
   async getProductPriceByName(productName: string) {
     const productCard = await this.getProductCardByName(productName);
-    const priceText = await productCard
-      .locator(this.productPrice)
-      .first()
-      .textContent();
-    const price = parseFloat(
-      priceText?.replace(/\s/g, '').replace(',', '.') || '0'
-    );
+    const priceText = await productCard.locator(this.productPrice).first().textContent();
+    const price = parseFloat(priceText?.replace(/\s/g, '').replace(',', '.') || '0');
     return price;
   }
 
@@ -125,13 +118,8 @@ export class CatalogPage extends BasePage {
     const products = await this.productCard.all();
 
     // Получаем цену ДО добавления (чтобы не ждать после клика)
-    const priceText = await products[index]
-      .locator(this.productPrice)
-      .first()
-      .textContent();
-    const price = parseFloat(
-      priceText?.replace(/\s/g, '').replace(',', '.') || '0'
-    );
+    const priceText = await products[index].locator(this.productPrice).first().textContent();
+    const price = parseFloat(priceText?.replace(/\s/g, '').replace(',', '.') || '0');
 
     const addButton = products[index].locator(this.addToCartButton);
     await expect(addButton).toBeEnabled({ timeout: 5000 });

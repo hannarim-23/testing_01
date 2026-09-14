@@ -36,11 +36,10 @@ export class AdminPage extends BasePage {
   readonly warehouseBtnSave: Locator;
   readonly warehouseBtnReject: Locator;
 
-
   // Заказы
   readonly orderTable: Locator;
   readonly orderStatusSelect: (orderId: string) => Locator;
-//  readonly orderRow: Locator;
+  //  readonly orderRow: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -64,9 +63,7 @@ export class AdminPage extends BasePage {
     this.succesAddProduct = page.getByText('Товар успешно создан');
 
     // Форма товара
-    this.productNameInput = page.locator(
-      'input[name="name"], input[placeholder*="Название"]'
-    );
+    this.productNameInput = page.locator('input[name="name"], input[placeholder*="Название"]');
     this.productDescriptionInput = page.locator(
       'input[name="description"], input[placeholder*="Описание"]'
     );
@@ -91,8 +88,7 @@ export class AdminPage extends BasePage {
 
     // Заказы
     this.orderTable = page.locator('table');
-    this.orderStatusSelect = (orderId: string) =>
-      page.locator(`tr:has-text("${orderId}") select`);
+    this.orderStatusSelect = (orderId: string) => page.locator(`tr:has-text("${orderId}") select`);
     //this.orderRow.locator('[role="combobox"]').first();
   }
 
@@ -178,9 +174,7 @@ export class AdminPage extends BasePage {
 
     if (product.category) {
       await this.productCategory.click();
-      const option = this.page
-        .locator(`[role="option"]:has-text("${product.category}")`)
-        .first();
+      const option = this.page.locator(`[role="option"]:has-text("${product.category}")`).first();
       await option.click();
     }
 
@@ -223,9 +217,7 @@ export class AdminPage extends BasePage {
 
     if (updates.category) {
       await this.productCategory.click();
-      const option = this.page
-        .locator(`[role="option"]:has-text("${updates.category}")`)
-        .first();
+      const option = this.page.locator(`[role="option"]:has-text("${updates.category}")`).first();
       await option.click();
     }
   }
@@ -240,15 +232,11 @@ export class AdminPage extends BasePage {
   }
 
   editProductButton(productName: string) {
-    return this.page
-      .locator(`tr:has-text("${productName}") button:has-text("Редакт.")`)
-      .first();
+    return this.page.locator(`tr:has-text("${productName}") button:has-text("Редакт.")`).first();
   }
 
   deleteProductButton(productName: string) {
-    return this.page
-      .locator(`tr:has-text("${productName}") button:has-text("Удалить")`)
-      .first();
+    return this.page.locator(`tr:has-text("${productName}") button:has-text("Удалить")`).first();
   }
 
   /*
@@ -284,9 +272,7 @@ export class AdminPage extends BasePage {
   }
 
   async expectWarehouseInTable(warehouseName: string) {
-    await expect(
-      this.page.locator(`tr:has-text("${warehouseName}")`)
-    ).toBeVisible();
+    await expect(this.page.locator(`tr:has-text("${warehouseName}")`)).toBeVisible();
   }
 
   async editWarehouse(warehouseName: string, newAddress: string) {

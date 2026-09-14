@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { RegisterPage } from '../../pages/UI/RegisterPage';
-import {newUser} from '../../helpers/newUser';
+import { newUser } from '../../helpers/newUser';
 
 //const BASE_URL = process.env.BASE_URL;
 const EMAIL = process.env.TEST_USER_EMAIL;
@@ -32,9 +32,7 @@ test.describe('Register Tests', () => {
       email: EMAIL,
     });
     await registerPage.expectErrorOnPage();
-    await expect(
-      registerPage.page.getByText(`Email "${EMAIL}" already exists.`)
-    ).toBeVisible();
+    await expect(registerPage.page.getByText(`Email "${EMAIL}" already exists.`)).toBeVisible();
   });
 
   test('TC_REG_03: Невалидный email @regression', async () => {
@@ -73,7 +71,7 @@ test.describe('Register Tests', () => {
       username: '',
       phoneNumber: '',
       password: '',
-      role:'',
+      role: '',
     });
     await registerPage.expectErrorOnPage();
     await registerPage.expectFieldErrors();
@@ -98,9 +96,7 @@ test.describe('Register Tests', () => {
     await registerPage.register({ ...user, phoneNumber: EXISTING_PHONE });
     await registerPage.expectErrorOnPage();
     await expect(
-      registerPage.page.getByText(
-        `Telephone number "${user.phoneNumber}" already exists.`
-      )
+      registerPage.page.getByText(`Telephone number "${user.phoneNumber}" already exists.`)
     ).toBeVisible();
   });
 

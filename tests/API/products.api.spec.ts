@@ -15,9 +15,7 @@ test.describe('API: PRODUCT', () => {
     createdProductIds.length = 0;
   });
 
-  test('API-01_1: POST /product — создание нового продукта', async ({
-    request,
-  }) => {
+  test('API-01_1: POST /product — создание нового продукта', async ({ request }) => {
     const productData = newProduct();
     const response = await request.post(`${API_URL}/product`, {
       data: productData,
@@ -45,9 +43,7 @@ test.describe('API: PRODUCT', () => {
     createdProductIds.push(responseBody.id);
   });
 
-  test('API-01_2: POST /product — создание нового продукта(негативный)', async ({
-    request,
-  }) => {
+  test('API-01_2: POST /product — создание нового продукта(негативный)', async ({ request }) => {
     const invalidProduct = {
       name: '', // пустое имя
       price: 'not a number',
@@ -61,9 +57,7 @@ test.describe('API: PRODUCT', () => {
     expect(response.status()).toBe(400);
   });
 
-  test('API-02_1: GET /product — получить все продукты', async ({
-    request,
-  }) => {
+  test('API-02_1: GET /product — получить все продукты', async ({ request }) => {
     const response = await request.get(`${API_URL}/product`, {});
     const responseBody = await response.json();
 
@@ -71,9 +65,7 @@ test.describe('API: PRODUCT', () => {
     expect(Array.isArray(responseBody)).toBe(true);
   });
 
-  test('API-03_1: GET /product/{id} — получить продукт', async ({
-    request,
-  }) => {
+  test('API-03_1: GET /product/{id} — получить продукт', async ({ request }) => {
     const response = await request.get(`${API_URL}/product/${testProducts.id}`);
 
     expect(response.status()).toBe(200);
@@ -96,9 +88,7 @@ test.describe('API: PRODUCT', () => {
     expect(response.status()).toBe(404);
   });
 
-  test('API-04_1: PATCH /product/{productId} — Обновить данные товара', async ({
-    request,
-  }) => {
+  test('API-04_1: PATCH /product/{productId} — Обновить данные товара', async ({ request }) => {
     // 1. Сначала создаём продукт, который будем обновлять
     const createResponse = await request.post(`${API_URL}/product`, {
       data: newProduct(),
@@ -152,9 +142,7 @@ test.describe('API: PRODUCT', () => {
     expect(response.status()).toBe(404);
   });
 
-  test('API-05_1: DELETE /product/{productId} — УДАЛИТЬ ТОВАР', async ({
-    request,
-  }) => {
+  test('API-05_1: DELETE /product/{productId} — УДАЛИТЬ ТОВАР', async ({ request }) => {
     const createResponse = await request.post(`${API_URL}/product`, {
       data: newProduct(),
     });
@@ -163,10 +151,7 @@ test.describe('API: PRODUCT', () => {
     const productId = product.id;
 
     // Удаляем
-    const deleteResponse = await request.delete(
-      `${API_URL}/product/${productId}`,
-      {}
-    );
+    const deleteResponse = await request.delete(`${API_URL}/product/${productId}`, {});
     expect(deleteResponse.status()).toBe(200);
 
     // Проверяем, что удалён
@@ -174,13 +159,8 @@ test.describe('API: PRODUCT', () => {
     expect(getResponse.status()).toBe(404);
   });
 
-  test('API-05_2: DELETE /product/{productId} — УДАЛИТЬ ТОВАР(негативный)', async ({
-    request,
-  }) => {
-    const deleteResponse = await request.delete(
-      `${API_URL}/product/${invalid}`,
-      {}
-    );
+  test('API-05_2: DELETE /product/{productId} — УДАЛИТЬ ТОВАР(негативный)', async ({ request }) => {
+    const deleteResponse = await request.delete(`${API_URL}/product/${invalid}`, {});
 
     expect(deleteResponse.status()).toBe(404);
   });

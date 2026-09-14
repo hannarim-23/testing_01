@@ -43,9 +43,7 @@ export class RegisterPage extends BasePage {
     this.template = page.locator('.text-destructive:has-text("пароль")');
 
     this.emailFormatError = page.getByText('email must be an email');
-    this.phoneFormatError = page.getByText(
-      'phoneNumber must be in international format'
-    );
+    this.phoneFormatError = page.getByText('phoneNumber must be in international format');
   }
 
   async goto() {
@@ -59,7 +57,7 @@ export class RegisterPage extends BasePage {
     username: string;
     phoneNumber: string;
     password: string;
-    role:string;
+    role: string;
   }) {
     await this.firstnameInput.fill(user.firstname);
     await this.lastnameInput.fill(user.lastname);

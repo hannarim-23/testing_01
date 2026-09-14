@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { newUser } from '../../helpers/newUser';
-import {existingUser} from '../../fixtures/existingUser'
+import { existingUser } from '../../fixtures/existingUser';
 
 const API_URL = process.env.API_URL;
 const ADMIN_USER = process.env.ADMIN_USER;
@@ -21,9 +21,7 @@ test.describe('API: Auth', () => {
     }
   });
 
-  test('API-01_1: POST /auth/register — успешная регистрация', async ({
-    request,
-  }) => {
+  test('API-01_1: POST /auth/register — успешная регистрация', async ({ request }) => {
     const userData = newUser();
     const response = await request.post(`${API_URL}/auth/register`, {
       data: userData,
@@ -57,9 +55,7 @@ test.describe('API: Auth', () => {
     expect(responseBody.message).toContain('already exists');
   });
 
-  test('API-02_1: POST /auth/login — вход существующего пользователя', async ({
-    request,
-  }) => {
+  test('API-02_1: POST /auth/login — вход существующего пользователя', async ({ request }) => {
     const response = await request.post(`${API_URL}/auth/login`, {
       data: { email: TEST_USER_EMAIL, password: TEST_USER_PASSWORD },
     });
@@ -85,9 +81,7 @@ test.describe('API: Auth', () => {
     expect(responseBody.role).toBe('ADMIN');
   });
 
-  test('API-02_3: POST /auth/login — вход с не валидными паролем', async ({
-    request,
-  }) => {
+  test('API-02_3: POST /auth/login — вход с не валидными паролем', async ({ request }) => {
     const response = await request.post(`${API_URL}/auth/login`, {
       data: { email: TEST_USER_EMAIL, password: 'INVALID' },
     });
@@ -98,9 +92,7 @@ test.describe('API: Auth', () => {
     expect(responseBody.message).toContain('Invalid email or password');
   });
 
-  test('API-03_1: PATCH /auth/{userID} — Обновить данные ', async ({
-    request,
-  }) => {
+  test('API-03_1: PATCH /auth/{userID} — Обновить данные', async ({ request }) => {
     const userData = newUser();
 
     const response = await request.post(`${API_URL}/auth/register`, {
@@ -135,7 +127,7 @@ test.describe('API: Auth', () => {
     createdUserIds.push(createdUser.id); // запоминаем для удаления
   });
 
-  test('API-03_2: PATCH /auth/{userID} — Обновить данные(пользователь не найден) ', async ({
+  test('API-03_2: PATCH /auth/{userID} — Обновить данные(пользователь не найден)', async ({
     request,
   }) => {
     const updateData = {
@@ -152,15 +144,12 @@ test.describe('API: Auth', () => {
 
     const updateResponseBody = await updateResponse.json();
     expect(updateResponse.status()).toBe(404);
-    expect(updateResponseBody.message).toContain(
-      `User with ID ${invalid} not found`
-    );
+    expect(updateResponseBody.message).toContain(`User with ID ${invalid} not found`);
   });
 
-  test('API-03_3: PATCH /auth/{userID} — Обновить данные(пользователь с таким Email or username существует) ', async ({
+  test('API-03_3: PATCH /auth/{userID} — Обновить данные(пользователь с таким Email or username существует)', async ({
     request,
   }) => {
-
     const userData = newUser();
     const response = await request.post(`${API_URL}/auth/register`, {
       data: userData,
@@ -185,9 +174,7 @@ test.describe('API: Auth', () => {
 
     const updateResponseBody = await updateResponse.json();
     expect(updateResponse.status()).toBe(409);
-    expect(updateResponseBody.message).toContain(
-      `Email "user1@mail.ru" already exists.`
-    );
+    expect(updateResponseBody.message).toContain(`Email "user1@mail.ru" already exists.`);
 
     createdUserIds.push(updateId); // запоминаем для удаления
   });

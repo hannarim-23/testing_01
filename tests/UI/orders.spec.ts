@@ -3,7 +3,7 @@ import { OrdersPage } from '../../pages/UI/OrdersPage';
 import { LoginPage } from '../../pages/UI/LoginPage';
 import { CartPage } from '../../pages/UI/CartPage';
 import { RegisterPage } from '../../pages/UI/RegisterPage';
-import {newUser} from '../../helpers/newUser';
+import { newUser } from '../../helpers/newUser';
 
 const EMAIL = process.env.TEST_USER_EMAIL;
 const PASSWORD = process.env.TEST_USER_PASSWORD;

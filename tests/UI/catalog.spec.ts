@@ -44,9 +44,7 @@ test.describe('Catalog Tests', () => {
   });
 
   test('TC_Ctlg_04: Открытие карточки товара @smoke', async () => {
-    const productCard = await catalogPage.getProductCardByName(
-      PRODUCT_NAME_TEST
-    );
+    const productCard = await catalogPage.getProductCardByName(PRODUCT_NAME_TEST);
     const href = await productCard.getAttribute('href');
 
     await productCard.click();
@@ -57,9 +55,7 @@ test.describe('Catalog Tests', () => {
   test('TC_Ctlg_05: Кнопка "Добавить" работает @smoke', async () => {
     await catalogPage.addProductToCart(PRODUCT_NAME_TEST);
 
-    await expect(
-      catalogPage.page.getByText('Товар добавлен в корзину')
-    ).toBeVisible();
+    await expect(catalogPage.page.getByText('Товар добавлен в корзину')).toBeVisible();
 
     await catalogPage.goToCart();
     await expect(catalogPage.page).toHaveURL('/cart');
